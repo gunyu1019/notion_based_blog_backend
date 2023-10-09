@@ -12,11 +12,11 @@ class RichText(BaseModel):
 
     def __init__(self, **data):
         super().__init__(**data)
-        self._text = data.get('text', {})
+        self._text = data.get("text", {})
 
     @property
     def text(self) -> str:
-        return self._text['content']
+        return self._text["content"]
 
     @property
     def is_redirect(self) -> bool:

@@ -13,11 +13,11 @@ class Annotations(BaseModel):
 
     def __init__(self, **data):
         super().__init__(**data)
-        self._color = data.get('color')
+        self._color = data.get("color")
 
     @property
     def background_color(self) -> bool:
-        return self._color.endswith('_background')
+        return self._color.endswith("_background")
 
     @property
     def color(self) -> colors.Colors:

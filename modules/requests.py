@@ -38,11 +38,7 @@ class Requests:
             return None
 
     async def requests(
-            self,
-            method: str,
-            url: str,
-            raise_on: bool = False,
-            **kwargs
+        self, method: str, url: str, raise_on: bool = False, **kwargs
     ) -> Response:
         single_session = False
         session = self.session

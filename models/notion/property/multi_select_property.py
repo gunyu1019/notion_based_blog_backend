@@ -10,7 +10,7 @@ class MultiSelectProperty(BaseModel):
 
     def __init__(self, **data):
         super().__init__(**data)
-        self._color = data.get('color')
+        self._color = data.get("color")
 
     @property
     def color(self) -> colors.Colors:

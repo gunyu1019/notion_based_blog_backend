@@ -19,7 +19,7 @@ class ImportSupporter:
         setup_func: Callable[[object, str | int], Any] = None,
         logger_name: str = "utils.import_supporter",
         is_debug: bool = False,
-        **default_key_argument
+        **default_key_argument,
     ):
         self.setup_func = setup_func or self.default_setup_func
         self.logger = logging.getLogger(logger_name)
@@ -103,11 +103,13 @@ class ImportSupporter:
 
         return self.setup_func(lib, name)
 
-    def load_modules(self, package, directory, after_loaded: Callable[..., None] = None):
+    def load_modules(
+        self, package, directory, after_loaded: Callable[..., None] = None
+    ):
         packages = [
-            package + "." + file[:-3] for file in os.listdir(
-                os.path.join(directory, package)
-            ) if file.endswith(".py")
+            package + "." + file[:-3]
+            for file in os.listdir(os.path.join(directory, package))
+            if file.endswith(".py")
         ]
         responses = []
         for package in packages:

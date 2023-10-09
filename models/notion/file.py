@@ -13,10 +13,10 @@ class File(BaseModel):
 
     @property
     def url(self) -> str:
-        return self._data['url']
+        return self._data["url"]
 
     @property
     def expiry_time(self) -> datetime.datetime | None:
-        if 'expiry_time' not in self._data or self.type == 'external':
+        if "expiry_time" not in self._data or self.type == "external":
             return
-        return datetime.datetime.fromisoformat(self._data['expiry_time'])
+        return datetime.datetime.fromisoformat(self._data["expiry_time"])

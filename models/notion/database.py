@@ -8,7 +8,7 @@ from .file import File
 
 
 class Database(BaseModel):
-    type: str = Field(..., alias='object')
+    type: str = Field(..., alias="object")
     id: str
     created_time: datetime.datetime
     # created_by
@@ -24,24 +24,27 @@ class Database(BaseModel):
 
     def __init__(self, **data):
         super().__init__(**data)
-        self._properties = data['properties']
+        self._properties = data["properties"]
 
     @classmethod
-    @field_validator('icon', 'cover', mode='before')
+    @field_validator("icon", "cover", mode="before")
     def convert_multiple_type_emoji_or_file(cls, v: dict[str, str] | None):
-        obj_type = v.get('type')
-        if obj_type == 'emoji':
+        obj_type = v.get("type")
+        if obj_type == "emoji":
             return Emoji.model_validate(v)
-        elif obj_type in ['file', 'external']:
+        elif obj_type in ["file", "external"]:
             return File.model_validate(v)
 
     @property
     def title(self) -> str:
         property_title_data = [
-            _property for _property in self._properties.values()
-            if _property.get('type') == 'title'
+            _property
+            for _property in self._properties.values()
+            if _property.get("type") == "title"
         ][0]
-        database_property_type_info: DatabasePropertyTypeInfo = getattr(DatabasePropertyType, 'title', None).value
+        database_property_type_info: DatabasePropertyTypeInfo = getattr(
+            DatabasePropertyType, "title", None
+        ).value
         return database_property_type_info(property_title_data)
 
     def property_keys(self):
@@ -51,7 +54,9 @@ class Database(BaseModel):
         property_type = self.property_type(key)
         if hasattr(DatabasePropertyType, property_type) is None:
             return
-        database_property_type_info: DatabasePropertyTypeInfo = getattr(DatabasePropertyType, property_type, None).value
+        database_property_type_info: DatabasePropertyTypeInfo = getattr(
+            DatabasePropertyType, property_type, None
+        ).value
 
         data = self._properties[key].get(property_type)
         if database_property_type_info.is_array:
@@ -59,7 +64,7 @@ class Database(BaseModel):
         return database_property_type_info(data)
 
     def property_type(self, key: str) -> str:
-        return self._properties[key].get('type')
+        return self._properties[key].get("type")
 
     def property_id(self, key: str) -> str:
-        return self._properties[key].get('type')
+        return self._properties[key].get("type")
