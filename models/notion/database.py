@@ -1,14 +1,14 @@
 import datetime
 
 from typing import Any
-from pydantic import BaseModel, Field, PrivateAttr, field_validator
+from pydantic import BaseModel, PrivateAttr, field_validator
 from .database_properties import DatabasePropertyType, DatabasePropertyTypeInfo
 from .emoji import Emoji
 from .file import File
 
 
 class Database(BaseModel):
-    type: str = Field(..., alias="object")
+    object: str
     id: str
     created_time: datetime.datetime
     # created_by
