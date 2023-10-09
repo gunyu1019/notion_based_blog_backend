@@ -37,17 +37,21 @@ class Database(BaseModel):
 
     @property
     def title(self) -> str:
-        return self.property('title')
+        property_title_data = [
+            _property for _property in self._properties.values()
+            if _property.get('type') == 'title'
+        ][0]
+        database_property_type_info: DatabasePropertyTypeInfo = getattr(DatabasePropertyType, 'title', None).value
+        return database_property_type_info(property_title_data)
 
     def property_keys(self):
         return self._properties.keys()
 
     def property(self, key: str) -> Any:
         property_type = self.property_type(key)
-        database_property_type_info: DatabasePropertyTypeInfo = getattr(DatabasePropertyType, property_type, None)
-        if database_property_type_info is None:
+        if hasattr(DatabasePropertyType, property_type) is None:
             return
-        database_property_type_info = database_property_type_info.value
+        database_property_type_info: DatabasePropertyTypeInfo = getattr(DatabasePropertyType, property_type, None).value
 
         data = self._properties[key].get(property_type)
         if database_property_type_info.is_array:
