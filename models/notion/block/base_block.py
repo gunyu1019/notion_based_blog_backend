@@ -1,7 +1,11 @@
 import datetime
-
 from abc import ABC
-from pydantic import BaseModel, Field
+from typing import Any
+
+from pydantic import BaseModel, PrivateAttr
+
+from ..file import File
+from ..rich_text import RichText
 
 
 class BaseBlock(BaseModel, ABC):
@@ -12,3 +16,27 @@ class BaseBlock(BaseModel, ABC):
     has_children: bool
     archived: bool
     type: str
+    _data: Any = PrivateAttr
+    _text_key: str = PrivateAttr("rich_text")
+
+    def __init__(self, **data):
+        super().__init__(**data)
+        self._data = data.get(self.type, {})
+
+    @property
+    def text(self) -> list[RichText] | None:
+        if "rich_text" not in self._data.keys():
+            return
+        return [RichText.model_validate(x) for x in self._data.get(self._text_key, [])]
+
+    @property
+    def is_text(self) -> bool:
+        return self.text is None
+
+    @property
+    def file(self) -> File | None:
+        return
+
+    @property
+    def is_file(self) -> bool:
+        return self.file is None
