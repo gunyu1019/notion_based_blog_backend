@@ -1,13 +1,14 @@
 import datetime
 
 from typing import Any
-from pydantic import BaseModel, PrivateAttr, field_validator
+from pydantic import PrivateAttr, field_validator
+from .base_multiple_type_files import BaseMultipleTypeFile
 from .database_properties import DatabasePropertyType, DatabasePropertyTypeInfo
 from .emoji import Emoji
 from .file import File
 
 
-class Database(BaseModel):
+class Database(BaseMultipleTypeFile):
     object: str
     id: str
     created_time: datetime.datetime
@@ -22,18 +23,11 @@ class Database(BaseModel):
     url: str
     public_url: str | None
 
+    _multiple_type_file_key: list[str] = PrivateAttr(["icon", "cover"])
+
     def __init__(self, **data):
         super().__init__(**data)
         self._properties = data["properties"]
-
-    @classmethod
-    @field_validator("icon", "cover", mode="before")
-    def convert_multiple_type_emoji_or_file(cls, v: dict[str, str] | None):
-        obj_type = v.get("type")
-        if obj_type == "emoji":
-            return Emoji.model_validate(v)
-        elif obj_type in ["file", "external"]:
-            return File.model_validate(v)
 
     @property
     def title(self) -> str:
