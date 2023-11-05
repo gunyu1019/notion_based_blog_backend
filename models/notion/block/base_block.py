@@ -3,8 +3,6 @@ from abc import ABC
 from typing import Any
 
 from pydantic import BaseModel, PrivateAttr
-
-from ..file import File
 from ..rich_text import RichText
 
 
@@ -16,7 +14,7 @@ class BaseBlock(BaseModel, ABC):
     has_children: bool
     archived: bool
     type: str
-    _data: Any = PrivateAttr
+    _data: Any = PrivateAttr()
     _text_key: str = PrivateAttr("rich_text")
 
     def __init__(self, **data):
@@ -32,11 +30,3 @@ class BaseBlock(BaseModel, ABC):
     @property
     def is_text(self) -> bool:
         return self.text is None
-
-    @property
-    def file(self) -> File | None:
-        return
-
-    @property
-    def is_file(self) -> bool:
-        return self.file is None
