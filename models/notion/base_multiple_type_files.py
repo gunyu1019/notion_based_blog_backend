@@ -6,7 +6,7 @@ from .file import File
 
 
 class BaseMultipleTypeFile(BaseModel, ABC):
-    _multiple_type_file_key: ModelPrivateAttr = PrivateAttr([""])
+    _multiple_type_file_key: ModelPrivateAttr = PrivateAttr([])
 
     @classmethod
     @field_validator(
