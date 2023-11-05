@@ -23,7 +23,7 @@ class BaseBlock(BaseModel, ABC):
 
     @property
     def text(self) -> list[RichText] | None:
-        if "rich_text" not in self._data.keys():
+        if self._text_key not in self._data.keys():
             return
         return [RichText.model_validate(x) for x in self._data.get(self._text_key, [])]
 
