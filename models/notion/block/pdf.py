@@ -5,11 +5,11 @@ from ..file import File as F
 from ..base_multiple_type_files import BaseMultipleTypeFile
 
 
-class File(BaseBlock, BaseMultipleTypeFile):
-    type: str = "file"
+class PDF(BaseBlock, BaseMultipleTypeFile):
+    type: str = "pdf"
     _text_key = PrivateAttr("caption")
-    _multiple_type_file_key = PrivateAttr(["file"])
-    file: F
+    _multiple_type_file_key = PrivateAttr(["pdf"])
+    pdf: F
 
     @property
     def captions(self) -> str | None:
