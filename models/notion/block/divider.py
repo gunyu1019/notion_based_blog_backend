@@ -2,4 +2,7 @@ from .base_block import BaseBlock
 
 
 class Divider(BaseBlock):
-    type: str = "divider"
+    class Meta:
+        type: str = "divider"
+
+    type: str = Meta.type

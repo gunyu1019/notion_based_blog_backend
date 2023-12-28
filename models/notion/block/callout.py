@@ -1,14 +1,18 @@
-from pydantic import PrivateAttr
+from pydantic import PrivateAttr, BeforeValidator
+from typing_extensions import Annotated
 
 from .base_block import BaseBlock
-from ..base_multiple_type_files import BaseMultipleTypeFile
+from ..convert_multiple_type_emoji_or_file import convert_multiple_type_emoji_or_file
 from ..emoji import Emoji
 from ..file import File
 
 
-class Callout(BaseBlock, BaseMultipleTypeFile):
-    type: str = "callout"
-    icon: Emoji | File | None
+class Callout(BaseBlock):
+    icon: Annotated[Emoji | File | None, BeforeValidator(convert_multiple_type_emoji_or_file)]
 
-    _text_key = PrivateAttr("captions")
-    _multiple_type_file_key = PrivateAttr(["icon"])
+    _text_key: str = PrivateAttr("captions")
+
+    class Meta:
+        type: str = "callout"
+
+    type: str = Meta.type

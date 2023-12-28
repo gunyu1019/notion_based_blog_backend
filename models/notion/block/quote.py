@@ -2,4 +2,7 @@ from .base_block import BaseBlock
 
 
 class Quote(BaseBlock):
-    type: str = "quote"
+    class Meta:
+        type: str = "quote"
+
+    type: str = Meta.type

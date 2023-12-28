@@ -3,7 +3,6 @@ from ..rich_text import RichText
 
 
 class Code(BaseBlock):
-    type: str = "code"
     language: str
 
     @property
@@ -12,3 +11,7 @@ class Code(BaseBlock):
             return
         return [RichText.model_validate(x) for x in self._data.get("captions", [])]
 
+    class Meta:
+        type: str = "code"
+
+    type: str = Meta.type
