@@ -1,14 +1,15 @@
 import datetime
 
-from typing import Any
-from pydantic import PrivateAttr, field_validator
-from .base_multiple_type_files import BaseMultipleTypeFile
+from typing import Any, Annotated
+from typing_extensions import Annotated
+from pydantic import PrivateAttr, BaseModel, BeforeValidator
+from .base_multiple_type_files import convert_multiple_type_emoji_or_file
 from .database_properties import DatabasePropertyType, DatabasePropertyTypeInfo
 from .emoji import Emoji
 from .file import File
 
 
-class Database(BaseMultipleTypeFile):
+class Database(BaseModel):
     object: str
     id: str
     created_time: datetime.datetime
@@ -17,13 +18,13 @@ class Database(BaseMultipleTypeFile):
     # last_edited_by
     # parent
     archived: bool
-    icon: Emoji | File | None
-    cover: Emoji | File | None
+    icon: Annotated[Emoji | File | None, BeforeValidator(convert_multiple_type_emoji_or_file)]
+    cover: Annotated[Emoji | File | None, BeforeValidator(convert_multiple_type_emoji_or_file)]
     _properties: dict[str, dict[str, Any]] = PrivateAttr
     url: str
     public_url: str | None
 
-    _multiple_type_file_key: list[str] = PrivateAttr(["icon", "cover"])
+    # _multiple_type_file_key: list[str] = PrivateAttr(["icon", "cover"])
 
     def __init__(self, **data):
         super().__init__(**data)
