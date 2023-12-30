@@ -1,9 +1,12 @@
 import datetime
 from abc import ABC
-from typing import Any
+from typing import Any, TYPE_CHECKING
+from pydantic import BaseModel, PrivateAttr, Field
 
-from pydantic import BaseModel, PrivateAttr
 from ..rich_text import RichText
+
+if TYPE_CHECKING:
+    from . import BLOCKS
 
 
 class BaseBlock(BaseModel, ABC):
@@ -16,6 +19,10 @@ class BaseBlock(BaseModel, ABC):
     type: str
     _data: Any = PrivateAttr()
     _text_key: str = PrivateAttr("rich_text")
+    children: list = Field(default_factory=list)
+
+    def _set_children(self, blocks: list["BLOCKS"]):
+        self.children = blocks
 
     def __init__(self, **data):
         super().__init__(**data)
