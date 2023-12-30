@@ -1,38 +1,95 @@
+from functools import wraps
+
 import aiohttp
 from async_client_decorator import *
 
 from models.notion import block
+from models.notion import database
+from .exception import *
 
 
 class NotionClient(Session):
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, version: str = "2022-06-28"):
         self.api_key = api_key
-        super().__init__(
-            base_url="https://api.notion.com",
-            headers={
-                "Authorization": "Bearer {0}".format(self.api_key),
-                "Notion-Version": "2022-06-28"
-            }
-        )
+        self.version = version
 
-    @get("/v1/blocks/{block_id}/children")
+        headers = {"Authorization": self._get_token, "Notion-Version": self.version}
+
+        super().__init__(base_url="https://api.notion.com", headers=headers)
+
+    @property
+    def _get_token(self) -> str:
+        return "Bearer {0}".format(self.api_key)
+
+    @staticmethod
+    def notion_get_result_able(func):
+        func.__component_parameter__.response.append("response")
+        return func
+
+    @staticmethod
+    def notion_get_result(func):
+        @wraps(func)
+        async def wrapper(self, response: aiohttp.ClientResponse, *args, **kwargs):
+            data = await response.json()
+            status_code = response.status
+            if response.status // 100 == 4:
+                for E in CLIENT_ERROR_RESPONSE.__args__:
+                    if E.status_code == status_code:
+                        raise E.from_payload(data)
+            elif response.status // 100 == 5:
+                for E in SERVER_ERROR_RESPONSE.__args__:
+                    if E.status_code == status_code:
+                        raise E()
+
+            result = data
+            if data["type"] == "list":
+                result = data["result"]
+
+            return await func(self, result=result, *args, **kwargs)
+
+        return wrapper
+
+    @staticmethod
+    def notion_result_listable(func):
+        @wraps(func)
+        async def wrapper(self, result, *args, **kwargs):
+            result_list = result["results"]
+            return await func(self, result=result_list, *args, **kwargs)
+
+        return wrapper
+
+    @notion_get_result_able
+    @get("/v1/blocks/{block_id}/children", response_parameter=["response"])
+    @notion_get_result
+    @notion_result_listable
     async def retrieve_block_children(
-            self,
-            response: aiohttp.ClientResponse,
-            block_id: Path | str
+        self, result: list, block_id: Path | str, detail: bool = False
     ) -> list[block.BLOCKS]:
-        data = await response.json()
-        if response.status != 200:
-            return
-
-        result = data['results']
         blocks = []
         for raw_block_data in result:
-            for T in block.BLOCKS.__args__:
-                if T.Meta.type != raw_block_data['type']:
-                    continue
+            raw_block_type = raw_block_data["type"]
+            if raw_block_type not in block.BLOCKS_KEY.keys():
+                continue
 
-                _data = T.model_validate(raw_block_data)
-                blocks.append(_data)
-                break
+            T = block.BLOCKS_KEY.get(raw_block_type)
+            _data: block.BLOCKS = T.model_validate(raw_block_data)
+            if detail and _data.has_children:
+                _data_detail = await self.retrieve_block_children(
+                    block_id=_data.id, detail=True
+                )
+                _data._set_children(_data_detail)
+            blocks.append(_data)
         return blocks
+
+    @notion_get_result_able
+    @post("/v1/databases/{database_id}/query", response_parameter=["response"])
+    @notion_get_result
+    @notion_result_listable
+    async def query_database(
+        self, result: list, database_id: str | Path
+    ) -> list[database.Database]:
+        pages = []
+        for raw_database_data in result:
+            _data = database.Database.model_validate(raw_database_data)
+            pages.append(_data)
+        return pages
