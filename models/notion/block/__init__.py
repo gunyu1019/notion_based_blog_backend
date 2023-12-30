@@ -41,3 +41,4 @@ BLOCKS = (
     | Toggle
     | Video
 )
+BLOCKS_KEY = {T.Meta.type: T for T in BLOCKS.__args__}
