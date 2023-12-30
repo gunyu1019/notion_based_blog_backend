@@ -3,6 +3,7 @@ import datetime
 from typing import Any, Annotated
 from typing_extensions import Annotated
 from pydantic import PrivateAttr, BaseModel, BeforeValidator
+from models.notion.rich_text import RichText
 from .convert_multiple_type_emoji_or_file import convert_multiple_type_emoji_or_file
 from .database_properties import DatabasePropertyType, DatabasePropertyTypeInfo
 from .emoji import Emoji
@@ -35,7 +36,7 @@ class Database(BaseModel):
         self._properties = data["properties"]
 
     @property
-    def title(self) -> str:
+    def title(self) -> list[RichText]:
         property_title_data = [
             _property
             for _property in self._properties.values()
@@ -44,7 +45,8 @@ class Database(BaseModel):
         database_property_type_info: DatabasePropertyTypeInfo = getattr(
             DatabasePropertyType, "title", None
         ).value
-        return database_property_type_info(property_title_data)
+        data = property_title_data.get("title")
+        return [database_property_type_info(x) for x in data]
 
     def property_keys(self):
         return self._properties.keys()
@@ -66,4 +68,4 @@ class Database(BaseModel):
         return self._properties[key].get("type")
 
     def property_id(self, key: str) -> str:
-        return self._properties[key].get("type")
+        return self._properties[key].get("id")
