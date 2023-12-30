@@ -3,7 +3,7 @@ import datetime
 from typing import Any, Annotated
 from typing_extensions import Annotated
 from pydantic import PrivateAttr, BaseModel, BeforeValidator
-from .base_multiple_type_files import convert_multiple_type_emoji_or_file
+from .convert_multiple_type_emoji_or_file import convert_multiple_type_emoji_or_file
 from .database_properties import DatabasePropertyType, DatabasePropertyTypeInfo
 from .emoji import Emoji
 from .file import File
@@ -18,8 +18,12 @@ class Database(BaseModel):
     # last_edited_by
     # parent
     archived: bool
-    icon: Annotated[Emoji | File | None, BeforeValidator(convert_multiple_type_emoji_or_file)]
-    cover: Annotated[Emoji | File | None, BeforeValidator(convert_multiple_type_emoji_or_file)]
+    icon: Annotated[
+        Emoji | File | None, BeforeValidator(convert_multiple_type_emoji_or_file)
+    ]
+    cover: Annotated[
+        Emoji | File | None, BeforeValidator(convert_multiple_type_emoji_or_file)
+    ]
     _properties: dict[str, dict[str, Any]] = PrivateAttr
     url: str
     public_url: str | None
