@@ -60,6 +60,9 @@ class Database(BaseModel):
         ).value
 
         data = self._properties[key].get(property_type)
+        if data is None:
+            return
+
         if database_property_type_info.is_array:
             return [database_property_type_info(x) for x in data]
         return database_property_type_info(data)
