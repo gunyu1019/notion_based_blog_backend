@@ -1,5 +1,5 @@
 import datetime
-
+import random
 from pydantic import BaseModel, Field
 
 from .category import Category
@@ -24,8 +24,12 @@ class PostItem(BaseModel):
             Category.model_validate(x.model_dump()) for x in category_property
         ]
 
-        thumbnail_property: File | None = data.property("Thumbnails")
-        thumbnail_url = getattr(thumbnail_property, "url", "")
+        thumbnail_property: list[File] = data.property("Thumbnails") or list()
+        thumbnail_url = (
+            (random.choice(thumbnail_property)).url
+            if len(thumbnail_property) > 0
+            else ""
+        )
 
         hits: int = data.property("Hits") or 0
         published_at_property: DateProperty | None = data.property("Published At")
