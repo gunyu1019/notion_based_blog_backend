@@ -15,6 +15,7 @@ class PostItem(BaseModel):
     thumbnail_url: str | None = None
     hits: int = 0
     published_at: datetime.datetime | None = None
+    last_edited_time: datetime.datetime | None
 
     @classmethod
     def from_notion(cls, data: Database):
@@ -28,7 +29,7 @@ class PostItem(BaseModel):
         thumbnail_url = (
             (random.choice(thumbnail_property)).url
             if len(thumbnail_property) > 0
-            else ""
+            else None
         )
 
         hits: int = data.property("Hits") or 0
@@ -37,6 +38,8 @@ class PostItem(BaseModel):
             published_at_property, "start", None
         )
 
+        last_edited_time: datetime.datetime | None = data.property("Last edited time")
+
         return cls(
             id=data.id,
             title=title,
@@ -44,4 +47,5 @@ class PostItem(BaseModel):
             thumbnail_url=thumbnail_url,
             hits=hits,
             published_at=published_at,
+            last_edited_time=last_edited_time,
         )
