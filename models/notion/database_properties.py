@@ -1,3 +1,4 @@
+import datetime
 from enum import Enum
 from typing import Any, NamedTuple, Callable
 
@@ -21,7 +22,7 @@ class DatabasePropertyType(Enum):
     checkbox = DatabasePropertyTypeInfo(bool)
     # created_by = DatabasePropertyTypeInfo()
     created_time = DatabasePropertyTypeInfo(
-        DateProperty, callable=lambda x: DateProperty.model_validate(x)
+        datetime.datetime, callable=lambda x: datetime.datetime.fromisoformat(x)
     )
     date = DatabasePropertyTypeInfo(
         DateProperty, callable=lambda x: DateProperty.model_validate(x)
@@ -33,7 +34,7 @@ class DatabasePropertyType(Enum):
     # formula = DatabasePropertyTypeInfo()
     # last_edited_by
     last_edited_time = DatabasePropertyTypeInfo(
-        DateProperty, callable=lambda x: DateProperty.model_validate(x)
+        datetime.datetime, callable=lambda x: datetime.datetime.fromisoformat(x)
     )
     multi_select = DatabasePropertyTypeInfo(
         MultiSelectProperty,
