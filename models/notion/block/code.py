@@ -4,7 +4,10 @@ from ..rich_text import RichText
 
 
 class Code(BaseBlock):
-    language: str
+    @computed_field
+    @property
+    def language(self) -> str:
+        return self._data["language"]
 
     @computed_field
     @property
