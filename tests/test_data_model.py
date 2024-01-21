@@ -1,6 +1,6 @@
 import asyncio
 
-from sqlalchemy import select
+from sqlalchemy import select, delete
 from sqlalchemy.sql import exists
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncConnection, AsyncEngine
@@ -28,14 +28,10 @@ async def main(engine: AsyncEngine, factory: AsyncSession):
         if not executed_result.scalar_one():
             page = Page(id="1234")
             block = Block(id="1234", type="test", has_children=True)
-            children_block = Block(
-                id="1235", type="test", has_children=True, page_parent_id=page.id
-            )
-            sub_children_block = Block(
-                id="1236", type="test", has_children=False, page_parent_id=page.id
-            )
-            text1 = RichText(text="안녕하세요!", color="black")
-            text2 = RichText(text="반갑습니다!", color="yellow")
+            children_block = Block(id="1235", type="test", has_children=True)
+            sub_children_block = Block(id="1236", type="test", has_children=False)
+            text1 = RichText(text="안녕하세요!")
+            text2 = RichText(text="반갑습니다!")
 
             sub_children_block.text.append(text1)
             sub_children_block.text.append(text2)
@@ -82,6 +78,11 @@ async def main(engine: AsyncEngine, factory: AsyncSession):
 
         for __block in data.blocks:
             await block_recursive(__block)
+
+        await session.execute(delete(RichText))
+        await session.execute(delete(Block))
+        await session.execute(delete(Page))
+        await session.commit()
 
     await engine.dispose()
 
