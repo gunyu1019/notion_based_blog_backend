@@ -9,6 +9,7 @@ from models.database.block_extra import BlockExtra
 
 if TYPE_CHECKING:
     from models.database.page import Page
+    from models.notion.block import BLOCKS
 
 
 class Block(Base):
@@ -17,7 +18,7 @@ class Block(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     type: Mapped[str] = mapped_column(String(20), nullable=False)
 
-    page_parent_id: Mapped[str] = mapped_column(ForeignKey("page.id"))
+    page_parent_id: Mapped[str] = mapped_column(ForeignKey("page.id"), nullable=True)
     block_parent_id: Mapped[str] = mapped_column(ForeignKey("block.id"), nullable=True)
     block_parent: Mapped["Block"] = relationship(back_populates="children")
     page_parent: Mapped["Page"] = relationship(back_populates="blocks")
@@ -40,3 +41,17 @@ class Block(Base):
     @property
     async def is_extra_available(self) -> bool:
         return len(await self.awaitable_attrs.extra) > 0
+
+    @classmethod
+    def from_block(cls, block: "BLOCKS"):
+        text = [
+            RichText.from_rich_text(x)
+            for x in (block.text if isinstance(block.text, list) else list())
+        ]
+        return cls(
+            id=block.id,
+            type=block.type,
+            has_children=block.has_children,
+            children=block.children,
+            text=text,
+        )

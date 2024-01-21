@@ -1,11 +1,10 @@
-from pydantic import PrivateAttr
+from pydantic import computed_field, PrivateAttr
 
 from .base_block import BaseBlock
 
 
 class Equation(BaseBlock):
-    _text_key = PrivateAttr("expression")
-
+    @computed_field
     @property
     def expression(self) -> str:
         return self._data["expression"]

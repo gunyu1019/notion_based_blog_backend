@@ -1,11 +1,14 @@
+from pydantic import computed_field
 from .base_block import BaseBlock
 
 
 class Heading(BaseBlock):
+    @computed_field
     @property
     def is_toggleable(self) -> bool:
         return self._data["is_toggleable"]
 
+    @computed_field
     @property
     def heading_type(self) -> int | None:
         if not self.type.startswith("heading_"):

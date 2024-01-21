@@ -1,3 +1,4 @@
+from pydantic import computed_field
 from .base_block import BaseBlock
 from ..rich_text import RichText
 
@@ -5,11 +6,12 @@ from ..rich_text import RichText
 class Code(BaseBlock):
     language: str
 
+    @computed_field
     @property
     def captions(self) -> list[RichText] | None:
-        if "captions" not in self._data.keys():
+        if "caption" not in self._data.keys():
             return
-        return [RichText.model_validate(x) for x in self._data.get("captions", [])]
+        return self._rich_text_model_validate(self._data["caption"])
 
     class Meta:
         type: str = "code"
