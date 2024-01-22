@@ -19,6 +19,7 @@ from .todo import Todo
 from .toggle import Toggle
 from .video import Video
 
+
 BLOCKS = (
     Bookmark
     | BulletedListItem
