@@ -1,4 +1,3 @@
-from pydantic import BaseModel, PrivateAttr
 from ..colorable import Colorable
 
 
