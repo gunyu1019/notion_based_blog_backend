@@ -1,6 +1,6 @@
 from abc import ABC
 from pydantic import BaseModel, PrivateAttr
-from modules.notion import colors
+from .colors import Colors
 from utils.find_enum import find_enum
 
 
@@ -12,5 +12,5 @@ class Colorable(BaseModel, ABC):
         return self._color.endswith("_background")
 
     @property
-    def color(self) -> colors.Colors:
-        return find_enum(colors.Colors, self._color)
+    def color(self) -> Colors:
+        return find_enum(Colors, self._color)
