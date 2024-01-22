@@ -3,14 +3,14 @@ import datetime
 from typing import Any, Annotated
 from typing_extensions import Annotated
 from pydantic import PrivateAttr, BaseModel, BeforeValidator
-from models.notion.rich_text import RichText
-from .convert_multiple_type_emoji_or_file import convert_multiple_type_emoji_or_file
+from .fileable import Fileable
 from .database_properties import DatabasePropertyType, DatabasePropertyTypeInfo
 from .emoji import Emoji
+from .rich_text import RichText
 from .file import File
 
 
-class Database(BaseModel):
+class Database(BaseModel, Fileable):
     object: str
     id: str
     created_time: datetime.datetime
@@ -20,10 +20,12 @@ class Database(BaseModel):
     # parent
     archived: bool
     icon: Annotated[
-        Emoji | File | None, BeforeValidator(convert_multiple_type_emoji_or_file)
+        Emoji | File | None,
+        BeforeValidator(Fileable.convert_multiple_type_emoji_or_file),
     ]
     cover: Annotated[
-        Emoji | File | None, BeforeValidator(convert_multiple_type_emoji_or_file)
+        Emoji | File | None,
+        BeforeValidator(Fileable.convert_multiple_type_emoji_or_file),
     ]
     _properties: dict[str, dict[str, Any]] = PrivateAttr
     url: str

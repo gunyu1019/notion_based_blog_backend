@@ -2,13 +2,13 @@ from pydantic import PrivateAttr, BeforeValidator, computed_field
 from typing_extensions import Annotated
 
 from .base_block import BaseBlock
-from ..convert_multiple_type_emoji_or_file import convert_multiple_type_emoji_or_file
+from ..fileable import Fileable
 from ..file import File as F
 from ..rich_text import RichText
 
 
-class Image(BaseBlock):
-    image: Annotated[F, BeforeValidator(convert_multiple_type_emoji_or_file)]
+class Image(BaseBlock, Fileable):
+    image: Annotated[F, BeforeValidator(Fileable.convert_multiple_type_emoji_or_file)]
 
     @computed_field
     @property

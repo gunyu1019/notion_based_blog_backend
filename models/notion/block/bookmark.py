@@ -1,4 +1,5 @@
-from pydantic import PrivateAttr, computed_field
+from pydantic import computed_field
+
 from .base_block import BaseBlock
 from ..rich_text import RichText
 

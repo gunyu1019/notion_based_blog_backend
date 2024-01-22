@@ -2,15 +2,16 @@ from pydantic import computed_field, BeforeValidator
 from typing_extensions import Annotated
 
 from .base_block import BaseBlock
-from ..convert_multiple_type_emoji_or_file import convert_multiple_type_emoji_or_file
+from ..fileable import Fileable
 from ..emoji import Emoji
 from ..file import File
 from ..rich_text import RichText
 
 
-class Callout(BaseBlock):
+class Callout(BaseBlock, Fileable):
     icon: Annotated[
-        Emoji | File | None, BeforeValidator(convert_multiple_type_emoji_or_file)
+        Emoji | File | None,
+        BeforeValidator(Fileable.convert_multiple_type_emoji_or_file),
     ]
 
     @computed_field

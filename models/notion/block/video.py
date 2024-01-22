@@ -3,12 +3,12 @@ from typing_extensions import Annotated
 
 from .base_block import BaseBlock
 from ..file import File as F
-from ..convert_multiple_type_emoji_or_file import convert_multiple_type_emoji_or_file
+from ..fileable import Fileable
 from ..rich_text import RichText
 
 
-class Video(BaseBlock):
-    video: Annotated[F, BeforeValidator(convert_multiple_type_emoji_or_file)]
+class Video(BaseBlock, Fileable):
+    video: Annotated[F, BeforeValidator(Fileable.convert_multiple_type_emoji_or_file)]
 
     @computed_field
     @property
