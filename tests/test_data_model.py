@@ -4,9 +4,8 @@ from sqlalchemy import select, delete
 from sqlalchemy.sql import exists
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession, AsyncConnection, AsyncEngine
-from typing import Callable
 
-from models.database import *
+from models.database import Block, BlockExtra, Page, RichText
 
 
 async def main(engine: AsyncEngine, factory: AsyncSession):
@@ -83,7 +82,6 @@ async def main(engine: AsyncEngine, factory: AsyncSession):
         await session.execute(delete(Block))
         await session.execute(delete(Page))
         await session.commit()
-
     await engine.dispose()
 
 
