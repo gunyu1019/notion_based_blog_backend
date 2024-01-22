@@ -85,6 +85,8 @@ class ImportSupporter:
                     ImportSupportException.extension_not_found, name, error_log
                 )
             )
+            if self.is_debug:
+                raise error
             return
 
         return lib
