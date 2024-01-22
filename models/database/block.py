@@ -7,6 +7,7 @@ from models.database.base import Base
 from models.database.block_extra import BlockExtra
 from models.database.rich_text import RichText
 from models.notion.block.base_block import BaseBlock
+from models.notion.fileable import Fileable
 from models.notion.file import File
 
 if TYPE_CHECKING:
@@ -50,6 +51,7 @@ class Block(Base):
             RichText.from_rich_text(x)
             for x in (block.text if isinstance(block.text, list) else list())
         ]
+
         extra_key_set = (
             set(block.model_fields_set) | set(block.model_computed_fields.keys())
         ) - (
@@ -57,22 +59,31 @@ class Block(Base):
             | set(BaseBlock.__pydantic_decorators__.computed_fields.keys())
         )
 
-        extra = [
-            BlockExtra(type=name, data=getattr(block, name)) for name in extra_key_set
-        ]
-        is_file_available = any(
-            [issubclass(File, v1.annotation) for v1 in block.model_fields.values()]
-            + [
-                issubclass(File, v2.return_type)
-                for v2 in block.model_computed_fields.values()
-            ]
-        )
-        return cls(
+        extra = []
+        for key in extra_key_set:
+            if "captions" == key:
+                continue
+
+            data = getattr(block, key)
+            _extra_type = "str"
+            if isinstance(data, File):
+                _extra_type = "file"
+                data = None
+            _extra = BlockExtra(name=key, value=data, type=_extra_type)
+            extra.append(_extra)
+
+        is_file_available = isinstance(block, Fileable)
+
+        children = []
+        if block.has_children:
+            children = [Block.from_block(x) for x in block.children]
+        new_cls = cls(
             id=block.id,
             type=block.type,
-            has_children=block.has_children,
-            children=block.children,
-            text=text,
             is_file_available=is_file_available,
-            extra=extra,
+            has_children=block.has_children,
         )
+        new_cls.text.extend(text)
+        new_cls.extra.extend(extra)
+        new_cls.children.extend(children)
+        return new_cls
