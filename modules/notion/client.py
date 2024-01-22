@@ -2,9 +2,8 @@ from functools import wraps
 
 import aiohttp
 from async_client_decorator import *
-
-from models.notion import block
-from models.notion import database
+from models.notion.block import BLOCKS, BLOCKS_KEY
+from models.notion.database import Database
 from .exception import *
 
 
@@ -22,12 +21,12 @@ class NotionClient(Session):
         return "Bearer {0}".format(self.api_key)
 
     @staticmethod
-    def notion_get_result_able(func):
+    def __notion_get_result_able(func):
         func.__component_parameter__.response.append("response")
         return func
 
     @staticmethod
-    def notion_get_result(func):
+    def __notion_get_result(func):
         @wraps(func)
         async def wrapper(self, response: aiohttp.ClientResponse, *args, **kwargs):
             data = await response.json()
@@ -50,7 +49,7 @@ class NotionClient(Session):
         return wrapper
 
     @staticmethod
-    def notion_result_listable(func):
+    def __notion_result_listable(func):
         @wraps(func)
         async def wrapper(self, result, *args, **kwargs):
             result_list = result["results"]
@@ -58,21 +57,21 @@ class NotionClient(Session):
 
         return wrapper
 
-    @notion_get_result_able
+    @__notion_get_result_able
     @get("/v1/blocks/{block_id}/children", response_parameter=["response"])
-    @notion_get_result
-    @notion_result_listable
+    @__notion_get_result
+    @__notion_result_listable
     async def retrieve_block_children(
         self, result: list, block_id: Path | str, detail: bool = False
-    ) -> list[block.BLOCKS]:
+    ) -> list[BLOCKS]:
         blocks = []
         for raw_block_data in result:
             raw_block_type = raw_block_data["type"]
-            if raw_block_type not in block.BLOCKS_KEY.keys():
+            if raw_block_type not in BLOCKS_KEY.keys():
                 continue
 
-            T = block.BLOCKS_KEY.get(raw_block_type)
-            _data: block.BLOCKS = T.model_validate(raw_block_data)
+            T = BLOCKS_KEY.get(raw_block_type)
+            _data: BLOCKS = T.model_validate(raw_block_data)
             if detail and _data.has_children:
                 _data_detail = await self.retrieve_block_children(
                     block_id=_data.id, detail=True
@@ -81,15 +80,15 @@ class NotionClient(Session):
             blocks.append(_data)
         return blocks
 
-    @notion_get_result_able
+    @__notion_get_result_able
     @post("/v1/databases/{database_id}/query", response_parameter=["response"])
-    @notion_get_result
-    @notion_result_listable
+    @__notion_get_result
+    @__notion_result_listable
     async def query_database(
         self, result: list, database_id: str | Path
-    ) -> list[database.Database]:
+    ) -> list[Database]:
         pages = []
         for raw_database_data in result:
-            _data = database.Database.model_validate(raw_database_data)
+            _data = Database.model_validate(raw_database_data)
             pages.append(_data)
         return pages
