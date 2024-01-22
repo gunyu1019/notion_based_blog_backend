@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import mapped_column, Mapped
 from sqlalchemy.types import Text
 
@@ -15,6 +15,7 @@ class RichText(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     text: Mapped[str] = mapped_column(Text, nullable=False)
+    type: Mapped[str] = mapped_column(String(10), nullable=False, default="text")
 
     # Annotated
     bold: Mapped[bool] = mapped_column(default=False)
