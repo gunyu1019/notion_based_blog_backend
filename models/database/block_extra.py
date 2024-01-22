@@ -15,7 +15,8 @@ class BlockExtra(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     type: Mapped[str] = mapped_column(String(10), nullable=False)
-    data: Mapped[str] = mapped_column(Text, nullable=False)
+    name: Mapped[str] = mapped_column(String(10), nullable=False)
+    value: Mapped[str] = mapped_column(Text, nullable=True, default=None)
 
     parent: Mapped["Block"] = relationship(back_populates="extra")
     parent_id: Mapped[str] = mapped_column(ForeignKey("block.id"))
