@@ -39,5 +39,8 @@ if len(sys.argv) > 1 and sys.argv[1] == "test":
     test_supporter = ImportSupporter(engine, factory, is_debug=True)
     test_supporter.load_modules("tests", directory)
 else:
-    view_image_supporter = ImportSupporter(app)
-    view_image_supporter.load_modules("routers", directory)
+    view_image_supporter = ImportSupporter(app, factory)
+    view_image_supporter.load_modules(
+        "routers",
+        directory,
+    )
