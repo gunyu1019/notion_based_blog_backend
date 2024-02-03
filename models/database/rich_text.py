@@ -14,6 +14,7 @@ class RichText(Base):
     __tablename__ = "rich_text"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    index: Mapped[int] = mapped_column(default=-1)
     text: Mapped[str] = mapped_column(Text, nullable=False)
     type: Mapped[str] = mapped_column(String(10), nullable=False, default="text")
 
@@ -31,10 +32,11 @@ class RichText(Base):
     parent_id: Mapped[str] = mapped_column(ForeignKey("block.id"))
 
     @classmethod
-    def from_rich_text(cls, rich_text: "NotionRichText"):
+    def from_rich_text(cls, rich_text: "NotionRichText", index: int = -1):
         annotated = rich_text.annotations
         return cls(
             text=rich_text.text,
+            index=index,
             href=rich_text.href,
             plain_text=rich_text.plain_text,
             bold=annotated.bold,
