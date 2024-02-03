@@ -18,6 +18,8 @@ async def main(engine: AsyncEngine, factory: AsyncSession):
         await conn.run_sync(RichText.metadata.create_all)
         await conn.commit()
 
+    return
+
     async with factory() as session:
         session: AsyncSession
 

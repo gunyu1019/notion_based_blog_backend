@@ -26,7 +26,9 @@ async def main(engine: AsyncEngine, factory: AsyncSession):
                 block_id=_block.id, detail=True
             )
             covered_block = Page(id=_block.id)
-            covered_block.blocks.extend([Block.from_block(x) for x in page])
+            covered_block.blocks.extend(
+                [Block.from_block(x, index=i) for (i, x) in enumerate(page)]
+            )
             print(len(covered_block.blocks))
             covered_page.append(covered_block)
     finally:
@@ -34,7 +36,7 @@ async def main(engine: AsyncEngine, factory: AsyncSession):
 
     async with factory() as session:
         session: AsyncSession
-        # session.add_all(covered_page)
+        session.add_all(covered_page)
         await session.commit()
     await engine.dispose()
 
