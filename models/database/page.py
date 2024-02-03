@@ -12,7 +12,9 @@ class Page(Base):
     __tablename__ = "page"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
-    blocks: Mapped[list[Block]] = relationship("Block", back_populates="page_parent")
+    blocks: Mapped[list[Block]] = relationship(
+        "Block", back_populates="page_parent", lazy="selectin", order_by=Block.index
+    )
 
     last_update_time: Mapped[datetime.datetime] = mapped_column(
         server_default=func.now(), server_onupdate=func.now()
