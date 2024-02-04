@@ -36,10 +36,11 @@ class PostRepository(BaseRepository):
         ])
         return page_model
 
-    async def insert_block(self, page_id: str, blocks: list[BLOCKS]):
+    async def insert_block(self, page_id: str, blocks: list[BLOCKS]) -> Page:
         page_model = self.page_model_validate(page_id, blocks)
         self._session.add(page_model)
         await self._session.commit()
+        return page_model
 
     async def delete_block(self, page_id: str) -> bool:
         origin_block = await self.get_block(page_id)
