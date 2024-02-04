@@ -13,7 +13,7 @@ class Page(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     blocks: Mapped[list[Block]] = relationship(
-        "Block", back_populates="page_parent", lazy="selectin", order_by=Block.index
+        "Block", back_populates="page_parent", lazy="selectin", order_by=Block.index, cascade="all, delete-orphan"
     )
 
     last_update_time: Mapped[datetime.datetime] = mapped_column(

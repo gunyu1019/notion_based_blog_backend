@@ -19,4 +19,4 @@ class BlockExtra(Base):
     value: Mapped[str] = mapped_column(Text, nullable=True, default=None)
 
     parent: Mapped["Block"] = relationship(back_populates="extra")
-    parent_id: Mapped[str] = mapped_column(ForeignKey("block.id"))
+    parent_id: Mapped[str] = mapped_column(ForeignKey("block.id", ondelete="CASCADE", onupdate="CASCADE"))

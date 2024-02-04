@@ -29,7 +29,7 @@ class RichText(Base):
     plain_text: Mapped[str] = mapped_column(Text, nullable=True, default=None)
     href: Mapped[str] = mapped_column(Text, nullable=True, default=None)
 
-    parent_id: Mapped[str] = mapped_column(ForeignKey("block.id"))
+    parent_id: Mapped[str] = mapped_column(ForeignKey("block.id", ondelete="CASCADE", onupdate="CASCADE"))
 
     @classmethod
     def from_rich_text(cls, rich_text: "NotionRichText", index: int = -1):

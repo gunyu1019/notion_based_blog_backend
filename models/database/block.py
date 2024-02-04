@@ -7,8 +7,8 @@ from models.database.base import Base
 from models.database.block_extra import BlockExtra
 from models.database.rich_text import RichText
 from models.notion.block.base_block import BaseBlock
-from models.notion.fileable import Fileable
 from models.notion.file import File
+from models.notion.fileable import Fileable
 
 if TYPE_CHECKING:
     from models.database.page import Page
@@ -22,15 +22,22 @@ class Block(Base):
     index: Mapped[int] = mapped_column(Integer, default=-1)
     type: Mapped[str] = mapped_column(String(20), nullable=False)
 
-    page_parent_id: Mapped[str] = mapped_column(ForeignKey("page.id"), nullable=True)
-    block_parent_id: Mapped[str] = mapped_column(ForeignKey("block.id"), nullable=True)
+    page_parent_id: Mapped[str] = mapped_column(
+        ForeignKey("page.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=True
+    )
+    block_parent_id: Mapped[str] = mapped_column(
+        ForeignKey("block.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=True
+    )
     # block_parent: Mapped["Block"] = relationship(back_populates="children")
     block_parent: Mapped["Block"] = relationship(
         "Block",
         remote_side=[id],
+        cascade="all"
         # backref=backref("children", uselist=True, lazy="selectin"),
     )
-    page_parent: Mapped["Page"] = relationship(back_populates="blocks")
+    page_parent: Mapped["Page"] = relationship(
+        back_populates="blocks", cascade="all"
+    )
 
     # Children
     has_children: Mapped[bool] = mapped_column(default=False)
@@ -47,13 +54,14 @@ class Block(Base):
         lazy="selectin",
         uselist=True,
         order_by="Block.index",
+        cascade="all",
     )
 
     text: Mapped[list[RichText]] = relationship(
-        lazy="selectin", order_by=RichText.index
+        lazy="selectin", order_by=RichText.index, cascade="all, delete-orphan"
     )
     extra: Mapped[list[BlockExtra]] = relationship(
-        back_populates="parent", lazy="selectin"
+        back_populates="parent", lazy="selectin", cascade="all, delete-orphan"
     )
 
     is_file_available: Mapped[bool] = mapped_column(nullable=False, default=False)
