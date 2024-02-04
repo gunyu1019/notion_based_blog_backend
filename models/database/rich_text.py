@@ -36,6 +36,7 @@ class RichText(Base):
         annotated = rich_text.annotations
         return cls(
             text=rich_text.text,
+            type=rich_text.type,
             index=index,
             href=rich_text.href,
             plain_text=rich_text.plain_text,
