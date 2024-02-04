@@ -3,9 +3,9 @@ import random
 from pydantic import BaseModel, Field
 
 from .category import Category
-from .notion.database import Database
-from .notion.property import DateProperty, MultiSelectProperty
-from .notion.file import File
+from models.notion.database import Database
+from models.notion.property import DateProperty, MultiSelectProperty
+from models.notion.file import File
 
 
 class PostItem(BaseModel):
