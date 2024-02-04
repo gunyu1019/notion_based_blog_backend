@@ -7,7 +7,7 @@ class NotionException:
         status_code: int,
         code: str,
         message: str,
-        request_id: str,
+        request_id: str = None,
         developer_survey: str = None,
     ):
         self.status_code = status_code
@@ -25,7 +25,7 @@ class NotionException:
             code=data["code"],
             message=data["message"],
             developer_survey=data.get("developer_survey", None),
-            request_id=data["request_id"],
+            request_id=data.get("request_id", None),
         )
 
     def __str__(self) -> str:
