@@ -9,3 +9,5 @@ from .emoji import Emoji
 from .error import NotionException
 from .fileable import Fileable
 from .file import File
+from .filter_entries import FilterEntries
+from .sort_entries import SortEntries

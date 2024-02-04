@@ -2,8 +2,11 @@ from functools import wraps
 
 import aiohttp
 from async_client_decorator import *
+
 from models.notion.block import BLOCKS, BLOCKS_KEY
 from models.notion.database import Database
+from models.notion.filter_entries import FilterEntries
+from models.notion.sort_entries import SortEntries
 from .exception import *
 
 
@@ -80,12 +83,42 @@ class NotionClient(Session):
             blocks.append(_data)
         return blocks
 
+    @staticmethod
+    def __notion_database_query(func):
+        func.__component_parameter__.body = "notion_body"
+        func.__component_parameter__.body_type = "json"
+
+        @wraps(func)
+        async def wrapper(self, *args, **kwargs):
+            notion_data = dict()
+            if "filter" in kwargs.keys() and kwargs.get("filter") is not None:
+                _filter: FilterEntries = kwargs.pop("filter")
+                notion_data["filter"] = _filter.to_dict()
+            if "order_by" in kwargs.keys() and kwargs.get("order_by") is not None:
+                order_by = kwargs.pop("order_by")
+                if isinstance(order_by, str):
+                    order_by = SortEntries(property=order_by)
+                notion_data["sort"] = order_by.model_dump()
+            func.__component_parameter__.body = notion_data
+            return await func(self, *args, **kwargs)
+
+        return wrapper
+
     @__notion_get_result_able
-    @post("/v1/databases/{database_id}/query", response_parameter=["response"])
+    @__notion_database_query
+    @post(
+        "/v1/databases/{database_id}/query",
+        response_parameter=["response"],
+        body_parameter="notion_body",
+    )
     @__notion_get_result
     @__notion_result_listable
     async def query_database(
-        self, result: list, database_id: str | Path
+        self,
+        result: list,
+        database_id: str | Path,
+        filter: FilterEntries = None,
+        sort: list[SortEntries | str] = None,
     ) -> list[Database]:
         pages = []
         for raw_database_data in result:
