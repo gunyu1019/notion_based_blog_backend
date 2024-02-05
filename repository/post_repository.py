@@ -1,9 +1,12 @@
+import datetime
+
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import select, exists
+from sqlalchemy.sql.base import NO_ARG
 
-from models.notion.block import BLOCKS
 from models.database.block import Block
 from models.database.page import Page
+from models.notion.block import BLOCKS
 from repository.base_repository import BaseRepository
 
 
@@ -28,16 +31,21 @@ class PostRepository(BaseRepository):
         return result.scalar_one_or_none()
 
     @staticmethod
-    def page_model_validate(page_id: str, blocks: list[BLOCKS]) -> Page:
-        page_model = Page(id=page_id)
+    def page_model_validate(page_id: str, blocks: list[BLOCKS], last_edited_time: datetime.datetime = NO_ARG) -> Page:
+        page_model = Page(id=page_id, last_update_time=last_edited_time)
         page_model.blocks.extend([
             Block.from_block(x, index=i)
             for (i, x) in enumerate(blocks)
         ])
         return page_model
 
-    async def insert_block(self, page_id: str, blocks: list[BLOCKS]) -> Page:
-        page_model = self.page_model_validate(page_id, blocks)
+    async def insert_block(
+            self,
+            page_id: str,
+            blocks: list[BLOCKS],
+            last_edited_time: datetime.datetime = NO_ARG
+    ) -> Page:
+        page_model = self.page_model_validate(page_id, blocks, last_edited_time)
         self._session.add(page_model)
         await self._session.commit()
         return page_model
