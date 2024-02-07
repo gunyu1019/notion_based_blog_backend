@@ -15,6 +15,7 @@ from .paragraph import Paragraph
 from .pdf import PDF
 from .quote import Quote
 from .table import Table
+from .table_row import TableRow
 from .todo import Todo
 from .toggle import Toggle
 from .video import Video
@@ -38,6 +39,7 @@ BLOCKS = (
     | PDF
     | Quote
     | Table
+    | TableRow
     | Todo
     | Toggle
     | Video
