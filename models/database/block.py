@@ -1,3 +1,4 @@
+import uuid
 from typing import TYPE_CHECKING
 
 from sqlalchemy import String, ForeignKey, Integer
@@ -12,7 +13,7 @@ from models.notion.fileable import Fileable
 
 if TYPE_CHECKING:
     from models.database.page import Page
-    from models.notion.block import BLOCKS
+    from models.notion.block import BLOCKS, TableRow
 
 
 class Block(Base):
@@ -92,6 +93,10 @@ class Block(Base):
 
         extra = []
         for key in extra_key_set:
+            # For table-row cells
+            if "cells" == key and block.type == "table_row":
+                continue
+
             if "captions" == key:
                 continue
 
@@ -110,6 +115,14 @@ class Block(Base):
             children = [
                 Block.from_block(x, index=i) for i, x in enumerate(block.children)
             ]
+
+        # For table-row cells
+        if block.type == "table_row":
+            children.extend([
+                Block.from_notion_table_column(block, index)
+                for index in range(len(block.cells))
+            ])
+
         new_cls = cls(
             id=block.id,
             index=index,
@@ -120,4 +133,24 @@ class Block(Base):
         new_cls.text.extend(text)
         new_cls.extra.extend(extra)
         new_cls.children.extend(children)
+        return new_cls
+
+    @classmethod
+    def from_notion_table_column(cls, original_block: "TableRow", index: int) -> "BLOCKS":
+        original_uuid = uuid.UUID(original_block.id)
+        new_uuid = uuid.uuid5(original_uuid, f"table-cell-{index}")
+
+        text = [
+            RichText.from_rich_text(x, index=i)
+            for (i, x) in enumerate(original_block.cells[index])
+        ]
+
+        new_cls = cls(
+            id=new_uuid.__str__(),
+            index=index,
+            type="table_column",
+            is_file_available=False,
+            has_children=False
+        )
+        new_cls.text.extend(text)
         return new_cls
