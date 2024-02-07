@@ -1,5 +1,6 @@
 import datetime
 
+from collections import deque
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import select, exists
 from sqlalchemy.sql.base import NO_ARG
@@ -31,19 +32,34 @@ class PostRepository(BaseRepository):
         return result.scalar_one_or_none()
 
     @staticmethod
-    def page_model_validate(page_id: str, blocks: list[BLOCKS], last_edited_time: datetime.datetime = NO_ARG) -> Page:
+    def page_model_validate(
+        page_id: str, blocks: list[BLOCKS], last_edited_time: datetime.datetime = NO_ARG
+    ) -> Page:
         page_model = Page(id=page_id, last_update_time=last_edited_time)
-        page_model.blocks.extend([
-            Block.from_block(x, index=i)
-            for (i, x) in enumerate(blocks)
-        ])
+        page_model.blocks.extend(
+            [Block.from_block(x, index=i) for (i, x) in enumerate(blocks)]
+        )
+
+        block_queue: deque[BLOCKS] = deque(blocks)
+        short_description = ""
+        while len(block_queue) > 0:
+            if len(short_description) >= 500:
+                break
+            block = block_queue.popleft()
+            if block.text is None:
+                continue
+            short_description += " ".join([x.plain_text for x in block.text if x.plain_text is not None])
+
+            if block.has_children:
+                block_queue.extendleft(block.children)
+        page_model.short_description = short_description
         return page_model
 
     async def insert_block(
-            self,
-            page_id: str,
-            blocks: list[BLOCKS],
-            last_edited_time: datetime.datetime = NO_ARG
+        self,
+        page_id: str,
+        blocks: list[BLOCKS],
+        last_edited_time: datetime.datetime = NO_ARG,
     ) -> Page:
         page_model = self.page_model_validate(page_id, blocks, last_edited_time)
         self._session.add(page_model)

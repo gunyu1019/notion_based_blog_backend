@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import String
+from sqlalchemy import String, Text
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy.sql import func
 
@@ -12,8 +12,9 @@ class Page(Base):
     __tablename__ = "page"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    short_description: Mapped[str] = mapped_column(Text, nullable=True)
     blocks: Mapped[list[Block]] = relationship(
-        "Block", back_populates="page_parent", lazy="selectin", order_by=Block.index, cascade="all, delete-orphan"
+        "Block", back_populates="page_parent", order_by=Block.index, cascade="all, delete-orphan"
     )
 
     last_update_time: Mapped[datetime.datetime] = mapped_column(
