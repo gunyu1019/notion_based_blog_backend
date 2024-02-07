@@ -16,12 +16,12 @@ class SessionCall(Generic[T]):
         client = None
         try:
             client = self.object(*self.args, **self.kwargs)
-            yield self
+            yield client
         finally:
             if not hasattr(client, self.after_closing_method_name):
                 return
 
-            after_closed_method = getattr(self.object, self.after_closing_method_name)
+            after_closed_method = getattr(client, self.after_closing_method_name)
             if asyncio.iscoroutinefunction(after_closed_method):
                 await after_closed_method()
             else:
