@@ -22,9 +22,12 @@ client = SessionCall(
 
 
 @router.get("/posts/")
-async def list_of_posts(private_access: bool = False, client_session: NotionClient = Depends(client.call)):
+async def list_of_posts(
+        private_access: bool = False,
+        session: PostRepository = Depends(database.call),
+        client_session: NotionClient = Depends(client.call)
+):
     pages = await client_session.query_database(database_id=database_id)
-    await client_session.close()
     return [
         PostItem.from_notion(x)
         for x in pages

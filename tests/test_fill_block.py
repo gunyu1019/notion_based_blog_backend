@@ -1,4 +1,5 @@
 import asyncio
+from collections import deque
 
 from sqlalchemy import select, delete
 from sqlalchemy.sql import exists
@@ -30,6 +31,24 @@ async def main(engine: AsyncEngine, factory: AsyncSession):
                 [Block.from_block(x, index=i) for (i, x) in enumerate(page)]
             )
             print(len(covered_block.blocks))
+
+            block_queue: deque[BLOCKS] = deque(page)
+            short_description = ""
+            while len(block_queue) > 0:
+                if len(short_description) >= 500:
+                    break
+                _block = block_queue.popleft()
+                try:
+                    if _block.text is None:
+                        continue
+                except AttributeError as e:
+                    print(_block)
+                    raise e
+                short_description += " ".join([x.plain_text for x in _block.text if x.plain_text is not None])
+
+                if _block.has_children:
+                    block_queue.extendleft(_block.children)
+            covered_block.short_description = short_description
             covered_page.append(covered_block)
     finally:
         await client.close()
