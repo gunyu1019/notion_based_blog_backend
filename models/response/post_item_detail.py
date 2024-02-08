@@ -1,6 +1,6 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
 
-from .block import Block
+from .blocks.block import Block
 from .post_item import PostItem
 
 

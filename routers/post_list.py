@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from config.config import get_config
 from models.notion.block import BLOCKS
-from models.response.block import Block
+from models.response.blocks.block import Block
 from models.response.post_item import PostItem
 from models.response.post_item_detail import PostItemDetail
 from modules.notion.client import NotionClient
@@ -28,11 +28,16 @@ async def list_of_posts(
         client_session: NotionClient = Depends(client.call)
 ):
     pages = await client_session.query_database(database_id=database_id)
-    return [
+    post_items = [
         PostItem.from_notion(x)
         for x in pages
         if not private_access or x.property("Publish") is True
     ]
+    pages_from_database = await session.get_pages()
+    short_description_with_id = {x.id: x.short_description for x in pages_from_database}
+    for post_item in post_items:
+        post_item.description = short_description_with_id.get(post_item.id) or "미리보기 없음"
+    return post_items
 
 
 @router.get("/post")
@@ -71,6 +76,7 @@ async def post_info(
         page_from_database = new_page = session.page_model_validate(post_id, page, post_item.last_edited_time)
         await session.merge_block(new_page)
 
+    post_item.description = page_from_database.short_description
     post_item.content.extend([Block.model_validate(x) for x in page_from_database.blocks])
 
     return post_item

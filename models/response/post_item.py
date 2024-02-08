@@ -11,6 +11,7 @@ from models.notion.file import File
 class PostItem(BaseModel):
     id: str
     title: str
+    description: str = Field(default="미리보기 없음")
     category: list[Category] = Field(default_factory=list)
     thumbnail_url: str | None = None
     hits: int = 0
