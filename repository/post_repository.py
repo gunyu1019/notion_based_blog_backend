@@ -1,6 +1,7 @@
 import datetime
 
 from collections import deque
+from collections.abc import Sequence
 from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import select, exists
 from sqlalchemy.sql.base import NO_ARG
@@ -30,6 +31,11 @@ class PostRepository(BaseRepository):
         )
         result = await self._session.execute(query)
         return result.scalar_one_or_none()
+
+    async def get_pages(self) -> Sequence[Page]:
+        query = (select(Page))
+        result = await self._session.execute(query)
+        return result.scalars().all()
 
     @staticmethod
     def page_model_validate(
