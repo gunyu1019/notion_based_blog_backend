@@ -1,5 +1,6 @@
 import datetime
 import random
+import uuid
 from pydantic import BaseModel, Field
 
 from .category import Category
@@ -9,7 +10,7 @@ from models.notion.file import File
 
 
 class PostItem(BaseModel):
-    id: str
+    id: uuid.UUID
     title: str
     description: str = Field(default="미리보기 없음")
     category: list[Category] = Field(default_factory=list)

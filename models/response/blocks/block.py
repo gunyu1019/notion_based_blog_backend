@@ -1,10 +1,12 @@
+import uuid
+
 from pydantic import BaseModel, Field, ConfigDict
 
 from models.response.rich_text import RichText
 
 
 class Block(BaseModel):
-    id: str
+    id: uuid.UUID
     type: str
 
     has_children: bool = Field(default=False)
