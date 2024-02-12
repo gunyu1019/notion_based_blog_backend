@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from config.config import get_config
 from models.notion.block import BLOCKS
-from models.response.blocks.block import Block
+from models.response.blocks import *
 from models.response.post_item import PostItem
 from models.response.post_item_detail import PostItemDetail
 from modules.notion.client import NotionClient
@@ -79,7 +79,17 @@ async def post_info(
         await session.merge_block(new_page)
 
     post_item.description = page_from_database.short_description
-    post_item.content.extend([Block.model_validate(x) for x in page_from_database.blocks])
+    for _block in page_from_database.blocks:
+
+        for T in BLOCK_RES_SPEC_WITHOUT_RELOAD.__args__:
+            if _block.type in T.Metadata.available_type:
+                _model = T.model_validate(_block)
+                break
+        else:
+            _model = Block.model_validate(_block)
+        _model.set_extra_data(_block.extra_dict)
+        print(_model)
+        post_item.content.append(_model)
 
     return post_item
 
