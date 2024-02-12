@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 from collections import deque
 from collections.abc import Sequence
@@ -13,12 +14,12 @@ from repository.base_repository import BaseRepository
 
 
 class PostRepository(BaseRepository):
-    async def exist_block(self, page_id: str) -> bool:
+    async def exist_block(self, page_id: uuid.UUID) -> bool:
         query = select(exists(Page).where(Page.id == page_id))
         result = await self._session.execute(query)
         return result.scalar_one_or_none() or False
 
-    async def get_block(self, page_id: str) -> Page | None:
+    async def get_block(self, page_id: uuid.UUID) -> Page | None:
         query = (
             select(Page)
             .where(Page.id == page_id)
@@ -39,7 +40,7 @@ class PostRepository(BaseRepository):
 
     @staticmethod
     def page_model_validate(
-        page_id: str, blocks: list[BLOCKS], last_edited_time: datetime.datetime = NO_ARG
+        page_id: uuid.UUID, blocks: list[BLOCKS], last_edited_time: datetime.datetime = NO_ARG
     ) -> Page:
         page_model = Page(id=page_id, last_update_time=last_edited_time)
         page_model.blocks.extend(
@@ -63,7 +64,7 @@ class PostRepository(BaseRepository):
 
     async def insert_block(
         self,
-        page_id: str,
+        page_id: uuid.UUID,
         blocks: list[BLOCKS],
         last_edited_time: datetime.datetime = NO_ARG,
     ) -> Page:
@@ -72,7 +73,7 @@ class PostRepository(BaseRepository):
         await self._session.commit()
         return page_model
 
-    async def delete_block(self, page_id: str) -> bool:
+    async def delete_block(self, page_id: uuid.UUID) -> bool:
         origin_block = await self.get_block(page_id)
         await self._session.delete(origin_block)
         await self._session.commit()

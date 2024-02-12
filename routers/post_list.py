@@ -1,3 +1,5 @@
+import uuid
+
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
@@ -42,7 +44,7 @@ async def list_of_posts(
 
 @router.get("/post")
 async def post_info(
-        post_id: str,
+        post_id: uuid.UUID,
         session: PostRepository = Depends(database.call),
         client_session: NotionClient = Depends(client.call)
 ):
