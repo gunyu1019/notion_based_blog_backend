@@ -1,5 +1,6 @@
+import datetime
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import String, ForeignKey, Integer
 from sqlalchemy.orm import mapped_column, Mapped, relationship
@@ -122,7 +123,7 @@ class Block(Base):
                     for (i, x) in enumerate(data or list())
                 ])
                 continue
-            _extra_type = "str"
+            _extra_type = type(data).__name__
             if isinstance(data, File):
                 _extra_type = "file"
                 data = None
@@ -184,3 +185,26 @@ class Block(Base):
         )
         new_cls.text.extend(text)
         return new_cls
+
+    @property
+    def extra_dict(self) -> dict[str, Any]:
+        return {
+            x.name: self._extra_tp(x.type)(x.value)
+            for x in self.extra
+        }
+
+    def get_extra(self, name: str) -> Any:
+        return self.extra_dict[name]
+
+    def __contains__(self, item):
+        return super().__contains__(item) or item in [p.name for p in self.extra]
+
+    @staticmethod
+    def _extra_tp(type_name: str) -> type:
+        match type_name:
+            case "str":
+                return str
+            case "int":
+                return int
+            case "bool":
+                return bool
