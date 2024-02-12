@@ -1,4 +1,6 @@
 import datetime
+import uuid
+
 from abc import ABC
 from typing import Any, TYPE_CHECKING
 from pydantic import BaseModel, PrivateAttr, Field, computed_field
@@ -11,7 +13,7 @@ if TYPE_CHECKING:
 
 class BaseBlock(BaseModel, ABC):
     object: str
-    id: str
+    id: uuid.UUID
     created_time: datetime.datetime
     last_edited_time: datetime.datetime
     has_children: bool

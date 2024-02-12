@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 from typing import Any, Annotated
 from typing_extensions import Annotated
@@ -12,7 +13,7 @@ from .file import File
 
 class Database(BaseModel, Fileable):
     object: str
-    id: str
+    id: uuid.UUID
     created_time: datetime.datetime
     # created_by
     last_edited_time: datetime.datetime
