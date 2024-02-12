@@ -6,11 +6,22 @@ from .block import Block
 
 
 class TableBlock(Block):
-    has_row_header: bool
-    has_column_header: bool
-    width: int
-
     model_config = ConfigDict(from_attributes=True)
+
+    @computed_field
+    @property
+    def has_row_header(self) -> bool:
+        return self._extra_dict['has_row_header']
+
+    @computed_field
+    @property
+    def has_column_header(self) -> bool:
+        return self._extra_dict['has_column_header']
+
+    @computed_field
+    @property
+    def width(self) -> int:
+        return self._extra_dict['width']
 
     @computed_field
     @property
@@ -18,3 +29,6 @@ class TableBlock(Block):
         if not self.has_children:
             return 0
         return len(self.children)
+
+    class Metadata:
+        available_type = ["table"]
