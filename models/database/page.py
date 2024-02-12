@@ -1,6 +1,7 @@
 import datetime
+import uuid
 
-from sqlalchemy import String, Text
+from sqlalchemy import Text
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy.sql import func
 
@@ -11,7 +12,7 @@ from models.database.block import Block
 class Page(Base):
     __tablename__ = "page"
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
     short_description: Mapped[str] = mapped_column(Text, nullable=True)
     blocks: Mapped[list[Block]] = relationship(
         "Block", back_populates="page_parent", order_by=Block.index, cascade="all, delete-orphan"

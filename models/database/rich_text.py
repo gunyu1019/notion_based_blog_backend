@@ -1,3 +1,4 @@
+import uuid
 from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, String
@@ -13,7 +14,7 @@ if TYPE_CHECKING:
 class RichText(Base):
     __tablename__ = "rich_text"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
     index: Mapped[int] = mapped_column(default=-1)
     text: Mapped[str] = mapped_column(Text, nullable=False)
     type: Mapped[str] = mapped_column(String(10), nullable=False, default="text")
@@ -29,14 +30,15 @@ class RichText(Base):
     plain_text: Mapped[str] = mapped_column(Text, nullable=True, default=None)
     href: Mapped[str] = mapped_column(Text, nullable=True, default=None)
 
-    parent_id: Mapped[str] = mapped_column(ForeignKey("block.id", ondelete="CASCADE", onupdate="CASCADE"))
+    parent_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("block.id", ondelete="CASCADE", onupdate="CASCADE"))
 
     @classmethod
-    def from_rich_text(cls, rich_text: "NotionRichText", index: int = -1):
+    def from_rich_text(cls, rich_text: "NotionRichText", index: int = -1, _id: uuid.UUID = None, _type: str = None):
         annotated = rich_text.annotations
         return cls(
+            id=_id or uuid.uuid4(),
             text=rich_text.text,
-            type=rich_text.type,
+            type=_type or rich_text.type,
             index=index,
             href=rich_text.href,
             plain_text=rich_text.plain_text,

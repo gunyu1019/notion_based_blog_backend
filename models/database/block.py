@@ -19,14 +19,14 @@ if TYPE_CHECKING:
 class Block(Base):
     __tablename__ = "block"
 
-    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
     index: Mapped[int] = mapped_column(Integer, default=-1)
     type: Mapped[str] = mapped_column(String(20), nullable=False)
 
-    page_parent_id: Mapped[str] = mapped_column(
+    page_parent_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("page.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=True
     )
-    block_parent_id: Mapped[str] = mapped_column(
+    block_parent_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("block.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=True
     )
     # block_parent: Mapped["Block"] = relationship(back_populates="children")
@@ -36,9 +36,7 @@ class Block(Base):
         cascade="all"
         # backref=backref("children", uselist=True, lazy="selectin"),
     )
-    page_parent: Mapped["Page"] = relationship(
-        back_populates="blocks", cascade="all"
-    )
+    page_parent: Mapped["Page"] = relationship(back_populates="blocks", cascade="all")
 
     # Children
     has_children: Mapped[bool] = mapped_column(default=False)
@@ -59,7 +57,16 @@ class Block(Base):
     )
 
     text: Mapped[list[RichText]] = relationship(
-        lazy="selectin", order_by=RichText.index, cascade="all, delete-orphan"
+        lazy="selectin",
+        order_by=RichText.index,
+        cascade="all, delete-orphan",
+        primaryjoin="and_(Block.id == RichText.parent_id, RichText.type != 'captions')",
+    )
+    captions: Mapped[list[RichText]] = relationship(
+        lazy="selectin",
+        order_by=RichText.index,
+        cascade="all, delete-orphan",
+        primaryjoin="and_(Block.id == RichText.parent_id, RichText.type == 'captions')",
     )
     extra: Mapped[list[BlockExtra]] = relationship(
         back_populates="parent", lazy="selectin", cascade="all, delete-orphan"
@@ -78,7 +85,11 @@ class Block(Base):
     @classmethod
     def from_block(cls, block: "BLOCKS", index: int = -1):
         text = [
-            RichText.from_rich_text(x, index=i)
+            RichText.from_rich_text(
+                x,
+                index=i,
+                _id=uuid.uuid5(block.id, f"block-text-{i}")
+            )
             for (i, x) in enumerate(
                 block.text if isinstance(block.text, list) else list()
             )
@@ -92,20 +103,35 @@ class Block(Base):
         )
 
         extra = []
+        captions = []
         for key in extra_key_set:
             # For table-row cells
             if "cells" == key and block.type == "table_row":
                 continue
 
-            if "captions" == key:
-                continue
-
             data = getattr(block, key)
+
+            if "captions" == key:
+                captions.extend([
+                    RichText.from_rich_text(
+                        x,
+                        index=i,
+                        _type="captions",
+                        _id=uuid.uuid5(block.id, f"block-captions-{i}")
+                    )
+                    for (i, x) in enumerate(data or list())
+                ])
+                continue
             _extra_type = "str"
             if isinstance(data, File):
                 _extra_type = "file"
                 data = None
-            _extra = BlockExtra(name=key, value=data, type=_extra_type)
+            _extra = BlockExtra(
+                id=uuid.uuid5(block.id, f"block-extra-{key}"),
+                name=key,
+                value=data,
+                type=_extra_type
+            )
             extra.append(_extra)
 
         is_file_available = isinstance(block, Fileable)
@@ -118,10 +144,12 @@ class Block(Base):
 
         # For table-row cells
         if block.type == "table_row":
-            children.extend([
-                Block.from_notion_table_column(block, index)
-                for index in range(len(block.cells))
-            ])
+            children.extend(
+                [
+                    Block.from_notion_table_column(block, index)
+                    for index in range(len(block.cells))
+                ]
+            )
 
         new_cls = cls(
             id=block.id,
@@ -131,14 +159,16 @@ class Block(Base):
             has_children=block.has_children,
         )
         new_cls.text.extend(text)
+        new_cls.captions.extend(captions)
         new_cls.extra.extend(extra)
         new_cls.children.extend(children)
         return new_cls
 
     @classmethod
-    def from_notion_table_column(cls, original_block: "TableRow", index: int) -> "BLOCKS":
-        original_uuid = uuid.UUID(original_block.id)
-        new_uuid = uuid.uuid5(original_uuid, f"table-cell-{index}")
+    def from_notion_table_column(
+        cls, original_block: "TableRow", index: int
+    ) -> "BLOCKS":
+        new_uuid = uuid.uuid5(original_block.id, f"table-cell-{index}")
 
         text = [
             RichText.from_rich_text(x, index=i)
@@ -146,11 +176,11 @@ class Block(Base):
         ]
 
         new_cls = cls(
-            id=new_uuid.__str__(),
+            id=new_uuid,
             index=index,
             type="table_column",
             is_file_available=False,
-            has_children=False
+            has_children=False,
         )
         new_cls.text.extend(text)
         return new_cls
