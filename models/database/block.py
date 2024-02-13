@@ -208,3 +208,5 @@ class Block(Base):
                 return int
             case "bool":
                 return bool
+            case "float":
+                return float

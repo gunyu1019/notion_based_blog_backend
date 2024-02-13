@@ -88,7 +88,6 @@ async def post_info(
         else:
             _model = Block.model_validate(_block)
         _model.set_extra_data(_block.extra_dict)
-        print(_model)
         post_item.content.append(_model)
 
     return post_item
