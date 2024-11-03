@@ -2,6 +2,7 @@ from functools import wraps
 
 import aiohttp
 from ahttp_client import *
+from ahttp_client.extension import multiple_hook
 
 from models.notion.block import BLOCKS, BLOCKS_KEY
 from models.notion.database import Database
@@ -23,52 +24,12 @@ class NotionClient(Session):
     def _get_token(self) -> str:
         return "Bearer {0}".format(self.api_key)
 
-    @staticmethod
-    def __notion_get_result_able(func):
-        func.response_parameter.append("response")
-        return func
-
-    @staticmethod
-    def __notion_get_result(func):
-        @wraps(func)
-        async def wrapper(self, response: aiohttp.ClientResponse, *args, **kwargs):
-            data = await response.json()
-            status_code = response.status
-            if response.status // 100 == 4:
-                for E in CLIENT_ERROR_RESPONSE.__args__:
-                    if E.status_code == status_code:
-                        raise E.from_payload(data)
-            elif response.status // 100 == 5:
-                for E in SERVER_ERROR_RESPONSE.__args__:
-                    if E.status_code == status_code:
-                        raise E()
-
-            result = data
-            if data["type"] == "list":
-                result = data["result"]
-
-            return await func(self, result=result, *args, **kwargs)
-
-        return wrapper
-
-    @staticmethod
-    def __notion_result_listable(func):
-        @wraps(func)
-        async def wrapper(self, result, *args, **kwargs):
-            result_list = result["results"]
-            return await func(self, result=result_list, *args, **kwargs)
-
-        return wrapper
-
-    @__notion_get_result_able
     @get("/v1/blocks/{block_id}/children", response_parameter=["response"])
-    @__notion_get_result
-    @__notion_result_listable
     async def retrieve_block_children(
-        self, result: list, block_id: Path | str, detail: bool = False
+        self, response: list, block_id: Path | str, detail: bool = False
     ) -> list[BLOCKS]:
         blocks = []
-        for raw_block_data in result:
+        for raw_block_data in response:
             raw_block_type = raw_block_data["type"]
             if raw_block_type not in BLOCKS_KEY.keys():
                 continue
@@ -82,46 +43,66 @@ class NotionClient(Session):
                 _data._set_children(_data_detail)
             blocks.append(_data)
         return blocks
-
-    @staticmethod
-    def __notion_database_query(func):
-        func.body_parameter = "notion_body"
-        func.body_parameter_type  = "json"
-
-        @wraps(func)
-        async def wrapper(self, *args, **kwargs):
-            notion_data = dict()
-            if "filter" in kwargs.keys() and kwargs.get("filter") is not None:
-                _filter: FilterEntries = kwargs.pop("filter")
-                notion_data["filter"] = _filter.to_dict()
-            if "order_by" in kwargs.keys() and kwargs.get("order_by") is not None:
-                order_by = kwargs.pop("order_by")
-                if isinstance(order_by, str):
-                    order_by = SortEntries(property=order_by)
-                notion_data["sort"] = order_by.model_dump()
-            func.body = notion_data
-            return await func(self, *args, **kwargs)
-
-        return wrapper
-
-    @__notion_get_result_able
-    @__notion_database_query
+    
     @post(
         "/v1/databases/{database_id}/query",
-        response_parameter=["response"],
-        body_parameter="notion_body",
+        response_parameter=["response"]
     )
-    @__notion_get_result
-    @__notion_result_listable
     async def query_database(
         self,
-        result: list,
+        response: list,
         database_id: str | Path,
-        filter: FilterEntries = None,
-        sort: list[SortEntries | str] = None,
+        filter: FilterEntries | Query = None,
+        order_by: list[SortEntries | str] | Query = None,
     ) -> list[Database]:
         pages = []
-        for raw_database_data in result:
+        for raw_database_data in response:
             _data = Database.model_validate(raw_database_data)
             pages.append(_data)
         return pages
+
+    @query_database.before_hook
+    async def __notion_database_query(self, request_obj, path):
+        notion_data = dict()
+        if "filter" in request_obj.params.keys() and request_obj.params.get("filter") is not None:
+            _filter: FilterEntries = request_obj.params.pop("filter")
+            notion_data["filter"] = _filter.to_dict()
+        if "order_by" in request_obj.params.keys() and request_obj.params.get("order_by") is not None:
+            order_by = request_obj.params.pop("order_by")
+            if isinstance(order_by, str):
+                order_by = SortEntries(property=order_by)
+            notion_data["sort"] = order_by.model_dump()
+        request_obj.body = notion_data
+
+        if "filter" in request_obj.params.keys():
+            request_obj.params.pop("filter")
+        if "order_by" in request_obj.params.keys():
+            request_obj.params.pop("order_by")
+        return request_obj, path
+    
+
+    @multiple_hook(retrieve_block_children.after_hook, index=1)
+    @multiple_hook(query_database.after_hook, index=1)
+    async def __notion_get_result(self, response: aiohttp.ClientResponse):
+        data = await response.json()
+        status_code = response.status
+        if response.status // 100 == 4:
+            for E in CLIENT_ERROR_RESPONSE.__args__:
+                if E.status_code == status_code:
+                    raise E.from_payload(data)
+        elif response.status // 100 == 5:
+            for E in SERVER_ERROR_RESPONSE.__args__:
+                if E.status_code == status_code:
+                    raise E()
+
+        result = data
+        if data["type"] == "list":
+            result = data["result"]
+
+        return [result]
+    
+    @multiple_hook(retrieve_block_children.after_hook, index=2)
+    @multiple_hook(query_database.after_hook, index=2)
+    async def __notion_result_listable(self, response):
+        result_list = response["results"]
+        return result_list
