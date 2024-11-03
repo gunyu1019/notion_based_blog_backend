@@ -1,7 +1,7 @@
 from functools import wraps
 
 import aiohttp
-from async_client_decorator import *
+from ahttp_client import *
 
 from models.notion.block import BLOCKS, BLOCKS_KEY
 from models.notion.database import Database
@@ -25,7 +25,7 @@ class NotionClient(Session):
 
     @staticmethod
     def __notion_get_result_able(func):
-        func.__component_parameter__.response.append("response")
+        func.response_parameter.append("response")
         return func
 
     @staticmethod
@@ -85,8 +85,8 @@ class NotionClient(Session):
 
     @staticmethod
     def __notion_database_query(func):
-        func.__component_parameter__.body = "notion_body"
-        func.__component_parameter__.body_type = "json"
+        func.body_parameter = "notion_body"
+        func.body_parameter_type  = "json"
 
         @wraps(func)
         async def wrapper(self, *args, **kwargs):
@@ -99,7 +99,7 @@ class NotionClient(Session):
                 if isinstance(order_by, str):
                     order_by = SortEntries(property=order_by)
                 notion_data["sort"] = order_by.model_dump()
-            func.__component_parameter__.body = notion_data
+            func.body = notion_data
             return await func(self, *args, **kwargs)
 
         return wrapper
