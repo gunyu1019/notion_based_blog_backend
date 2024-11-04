@@ -4,12 +4,12 @@ from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from config.config import get_config
-from models.response.blocks import *
-from models.response.post_item import PostItem
-from models.response.post_item_detail import PostItemDetail
+from models.response import Content
+from models.notion.block.base_block import BaseBlock
+from models.notion.file import File
+from models.notion.emoji import Emoji
 from modules.notion.client import NotionClient
 from modules.notion.exception import NotFound
-from repository.post_repository import PostRepository
 from utils.session_call import SessionCall
 
 parser = get_config()
@@ -32,12 +32,28 @@ async def content(
             detail=False
         )
     except NotFound:
-        raise HTTPException(status_code=404, detail="Post not found.") 
-    content_block
-    return 
+        raise HTTPException(status_code=404, detail="Post not found.")
+
+    if content_block is None:
+        return []
+    
+    extra_key_set = (
+        set(content_block.model_fields_set) | set(content_block.model_computed_fields.keys())
+    ) - (
+        set(BaseBlock.model_fields.keys())
+        | set(BaseBlock.__pydantic_decorators__.computed_fields.keys())
+    )
+
+    result = []
+    for extra_key in extra_key_set:
+        data = getattr(content_block, extra_key)
+        if not isinstance(data, File):
+            continue
+        result.append(
+            Content.from_notion(extra_key, data)
+        )
+    return result
 
 
-def setup(client: FastAPI, _db: async_sessionmaker):
-    global database
-    database.set_factory(_db)
+def setup(client: FastAPI, _: async_sessionmaker):
     client.include_router(router)
