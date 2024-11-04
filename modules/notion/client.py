@@ -43,6 +43,23 @@ class NotionClient(Session):
                 _data._set_children(_data_detail)
             blocks.append(_data)
         return blocks
+
+    @get("/v1/blocks/{block_id}", response_parameter=["response"])
+    async def retrieve_block(
+        self, response: dict, block_id: Path | str, detail: bool = False
+    ) -> BLOCKS | None:
+        raw_block_type = response["type"]
+        if raw_block_type not in BLOCKS_KEY.keys():
+            return
+
+        T = BLOCKS_KEY.get(raw_block_type)
+        block: BLOCKS = T.model_validate(response)
+        if detail and block.has_children:
+            _data_detail = await self.retrieve_block_children(
+                block_id=block.id, detail=True
+            )
+            block._set_children(_data_detail)
+        return block
     
     @post(
         "/v1/databases/{database_id}/query",
