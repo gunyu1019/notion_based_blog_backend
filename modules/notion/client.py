@@ -46,14 +46,15 @@ class NotionClient(Session):
 
     @get("/v1/blocks/{block_id}", response_parameter=["response"])
     async def retrieve_block(
-        self, response: dict, block_id: Path | str, detail: bool = False
+        self, response: list, block_id: Path | str, detail: bool = False
     ) -> BLOCKS | None:
-        raw_block_type = response["type"]
+        raw_block_data = response[0]
+        raw_block_type = raw_block_data["type"]
         if raw_block_type not in BLOCKS_KEY.keys():
             return
 
         T = BLOCKS_KEY.get(raw_block_type)
-        block: BLOCKS = T.model_validate(response)
+        block: BLOCKS = T.model_validate(raw_block_data)
         if detail and block.has_children:
             _data_detail = await self.retrieve_block_children(
                 block_id=block.id, detail=True
@@ -100,6 +101,7 @@ class NotionClient(Session):
 
     @multiple_hook(retrieve_block_children.after_hook, index=1)
     @multiple_hook(query_database.after_hook, index=1)
+    @retrieve_block.after_hook
     async def __notion_get_result(self, response: aiohttp.ClientResponse):
         data = await response.json()
         status_code = response.status
