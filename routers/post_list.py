@@ -70,7 +70,7 @@ async def post_info(
         is_new_entry = True
 
     # Equal last edited time (notion == database).
-    if post_item.last_edited_time.replace(tzinfo=None) == page_from_database.last_update_time and not is_new_entry:
+    if post_item.last_edited_time.replace(tzinfo=None) != page_from_database.last_update_time and not is_new_entry:
         page: list[BLOCKS] = await client_session.retrieve_block_children(
             block_id=post_id,
             detail=True
