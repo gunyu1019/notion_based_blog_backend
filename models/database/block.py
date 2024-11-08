@@ -106,12 +106,22 @@ class Block(Base):
         extra = []
         captions = []
         for key in extra_key_set:
-            # For table-row cells
-            if "cells" == key and block.type == "table_row":
-                continue
 
             data = getattr(block, key)
 
+            # For table-row cells
+            if "cells" == key and block.type == "table_row":
+                cells_text = []
+                for i, x in enumerate(data or list()):
+                    cells_text.extend([RichText.from_rich_text(
+                        text,
+                        index=j,
+                        _type=f"cell_{i}",
+                        _id=uuid.uuid5(block.id, f"block-cell-{i}-{j}")
+                    ) for (j, text) in enumerate(x)])
+                text.extend(cells_text)
+                print(text)
+                continue
             if "captions" == key:
                 captions.extend([
                     RichText.from_rich_text(
