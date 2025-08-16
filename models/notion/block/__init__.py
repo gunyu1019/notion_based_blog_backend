@@ -2,6 +2,7 @@ from .bookmark import Bookmark
 from .bulleted_list_item import BulletedListItem
 from .callout import Callout
 from .code import Code
+from .column import Column
 from .column_list import ColumnList
 from .divider import Divider
 from .embed import Embed
@@ -26,6 +27,7 @@ BLOCKS = (
     | BulletedListItem
     | Callout
     | Code
+    | Column
     | ColumnList
     | Divider
     | Embed

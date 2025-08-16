@@ -23,7 +23,7 @@ client = SessionCall(
 )
 
 
-@router.get("/posts/")
+@router.get("/posts")
 async def list_of_posts(
         private_access: bool = False,
         session: PostRepository = Depends(database.call),
