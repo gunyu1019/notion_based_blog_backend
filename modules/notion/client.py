@@ -1,7 +1,11 @@
 from functools import wraps
 
 import aiohttp
-from async_client_decorator import *
+from ahttp_client import *
+from typing import Annotated, Any, Coroutine
+
+from ahttp_client import RequestCore
+from pip._internal import req
 
 from models.notion.block import BLOCKS, BLOCKS_KEY
 from models.notion.database import Database
@@ -25,7 +29,7 @@ class NotionClient(Session):
 
     @staticmethod
     def __notion_get_result_able(func):
-        func.__component_parameter__.response.append("response")
+        func.response_parameter.append("response")
         return func
 
     @staticmethod
@@ -47,7 +51,8 @@ class NotionClient(Session):
             if data["type"] == "list":
                 result = data["result"]
 
-            return await func(self, result=result, *args, **kwargs)
+            kwargs["result"] = result
+            return await func(self, *args, **kwargs)
 
         return wrapper
 
@@ -83,29 +88,7 @@ class NotionClient(Session):
             blocks.append(_data)
         return blocks
 
-    @staticmethod
-    def __notion_database_query(func):
-        func.__component_parameter__.body = "notion_body"
-        func.__component_parameter__.body_type = "json"
-
-        @wraps(func)
-        async def wrapper(self, *args, **kwargs):
-            notion_data = dict()
-            if "filter" in kwargs.keys() and kwargs.get("filter") is not None:
-                _filter: FilterEntries = kwargs.pop("filter")
-                notion_data["filter"] = _filter.to_dict()
-            if "order_by" in kwargs.keys() and kwargs.get("order_by") is not None:
-                order_by = kwargs.pop("order_by")
-                if isinstance(order_by, str):
-                    order_by = SortEntries(property=order_by)
-                notion_data["sort"] = order_by.model_dump()
-            func.__component_parameter__.body = notion_data
-            return await func(self, *args, **kwargs)
-
-        return wrapper
-
     @__notion_get_result_able
-    @__notion_database_query
     @post(
         "/v1/databases/{database_id}/query",
         response_parameter=["response"],
@@ -115,13 +98,27 @@ class NotionClient(Session):
     @__notion_result_listable
     async def query_database(
         self,
-        result: list,
-        database_id: str | Path,
-        filter: FilterEntries = None,
-        sort: list[SortEntries | str] = None,
+        database_id: Annotated[str, Path],
+        result: list = None,
+        filter: Annotated[FilterEntries | None, BodyJson] = None,
+        sort: Annotated[list[SortEntries | str | None], BodyJson] = None,
     ) -> list[Database]:
         pages = []
         for raw_database_data in result:
             _data = Database.model_validate(raw_database_data)
             pages.append(_data)
         return pages
+
+    @query_database.before_hook
+    async def before_query_database(self, req_obj: RequestCore, req_path: str) -> tuple[RequestCore, str]:
+        if "filter" in req_obj.body.keys():
+            _filter: FilterEntries | None = req_obj.body.pop("filter")
+            if _filter is not None:
+                req_obj.body["filter"] = _filter.to_dict()
+        if "sort" in req_obj.body.keys():
+            order_by = req_obj.body.pop("sort")
+            if order_by is not None:
+                if isinstance(order_by, str):
+                    order_by = SortEntries(property=order_by)
+                req_obj.body["sort"] = order_by.model_dump()
+        return req_obj, req_path
