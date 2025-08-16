@@ -1,5 +1,5 @@
 import asyncio
-from typing import TypeVar, Generic, Type
+from typing import TypeVar, Generic, Type, Any, AsyncGenerator
 
 T = TypeVar('T')
 
@@ -12,7 +12,7 @@ class SessionCall(Generic[T]):
 
         self.after_closing_method_name = after_closing_method_name
 
-    async def call(self) -> T:
+    async def call(self) -> AsyncGenerator[Any, Any]:
         client = None
         try:
             client = self.object(*self.args, **self.kwargs)
