@@ -66,7 +66,8 @@ async def post_info(
             block_id=post_id,
             detail=True
         )
-        page_from_database = await session.insert_block(post_id, page, post_item.last_edited_time)
+        await session.insert_block(post_id, page, post_item.last_edited_time)
+        page_from_database = await session.get_block(page_id=post_id)
         is_new_entry = True
 
     # Equal last edited time (notion == database).
