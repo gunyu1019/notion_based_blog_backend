@@ -1,7 +1,7 @@
 from abc import ABC
 from pydantic import BaseModel, PrivateAttr
 from .colors import Colors
-from app.utils.find_enum import find_enum
+from utils.find_enum import find_enum
 
 
 class Colorable(BaseModel, ABC):

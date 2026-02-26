@@ -10,9 +10,9 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from app.core.config import get_config
-from app.utils.directory import directory
-from app.utils.import_supporter import ImportSupporter
+from core.config import get_config
+from utils.directory import directory
+from utils.import_supporter import ImportSupporter
 
 app = FastAPI()
 log = logging.getLogger(__name__)

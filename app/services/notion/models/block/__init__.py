@@ -1,4 +1,5 @@
 from .bookmark import Bookmark
+from .base_block import BaseBlock
 from .bulleted_list_item import BulletedListItem
 from .callout import Callout
 from .code import Code

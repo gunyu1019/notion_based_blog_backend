@@ -5,7 +5,7 @@ from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy.types import Text
 
-from app.models.base import Base
+from models.base import Base
 
 if TYPE_CHECKING:
     from app.models.block import Block

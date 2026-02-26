@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import uuid
 from typing import TYPE_CHECKING
 
@@ -5,10 +7,10 @@ from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import mapped_column, Mapped
 from sqlalchemy.types import Text
 
-from app.models.base import Base
+from models.base import Base
 
 if TYPE_CHECKING:
-    from app.models.notion import RichText as NotionRichText
+    from models.notion import RichText as NotionRichText
 
 
 class RichText(Base):

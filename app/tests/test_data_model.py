@@ -2,10 +2,11 @@ import asyncio
 
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncConnection, AsyncEngine
 
-from app.models import Block, BlockExtra, Page, RichText
+from models import Block, BlockExtra, Page, RichText
 
 
 async def main(engine: AsyncEngine):
+    print("1")
     async with engine.begin() as conn:
         conn: AsyncConnection
 
@@ -14,6 +15,7 @@ async def main(engine: AsyncEngine):
         await conn.run_sync(Page.metadata.create_all)
         await conn.run_sync(RichText.metadata.create_all)
         await conn.commit()
+    print(2)
     return
 
 

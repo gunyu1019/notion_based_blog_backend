@@ -2,10 +2,10 @@ import aiohttp
 from ahttp_client import *
 from ahttp_client.extension import multiple_hook
 
-from app.services.notion.models import BLOCKS, BLOCKS_KEY
-from app.services.notion.models import Database
-from app.services.notion.models import FilterEntries
-from app.services.notion.models import SortEntries
+from services.notion.models import BLOCKS, BLOCKS_KEY
+from services.notion.models import Database
+from services.notion.models import FilterEntries
+from services.notion.models import SortEntries
 from .exception import *
 
 

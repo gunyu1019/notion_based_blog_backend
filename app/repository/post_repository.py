@@ -7,10 +7,10 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import select, exists
 from sqlalchemy.sql.base import NO_ARG
 
-from app.models.block import Block
-from app.models.page import Page
-from app.services.notion.models import BLOCKS
-from app.repository.base_repository import BaseRepository
+from models.block import Block
+from models.page import Page
+from services.notion.models import BLOCKS
+from repository.base_repository import BaseRepository
 
 
 class PostRepository(BaseRepository):
