@@ -41,6 +41,6 @@ if len(sys.argv) > 1 and sys.argv[1] == "test":
 else:
     view_image_supporter = ImportSupporter(app, factory)
     view_image_supporter.load_modules(
-        "routers",
+        "api",
         directory,
     )

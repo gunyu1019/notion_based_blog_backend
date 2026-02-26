@@ -3,7 +3,7 @@ import uuid
 from pydantic import BaseModel, Field, ConfigDict, PrivateAttr
 from typing import Any
 
-from app.models.response.rich_text import RichText
+from app.models.response import RichText
 
 
 class Block(BaseModel):

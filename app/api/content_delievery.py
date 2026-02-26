@@ -4,11 +4,11 @@ from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from app.core.config import get_config
-from app.models.response import Content
-from app.models.notion.block.base_block import BaseBlock
-from app.models.notion.file import File
-from app.modules.notion.client import NotionClient
-from app.modules.notion.exception import NotFound
+from app.schemas.content import Content
+from app.services.notion.models import BaseBlock
+from app.services.notion.models import File
+from app.services.notion.client import NotionClient
+from app.services.notion.exception import NotFound
 from app.utils.session_call import SessionCall
 
 parser = get_config()

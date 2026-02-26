@@ -7,9 +7,9 @@ from sqlalchemy.orm import selectinload
 from sqlalchemy.sql import select, exists
 from sqlalchemy.sql.base import NO_ARG
 
-from app.models.database.block import Block
-from app.models.database.page import Page
-from app.models.notion.block import BLOCKS
+from app.models.block import Block
+from app.models.page import Page
+from app.services.notion.models import BLOCKS
 from app.repository.base_repository import BaseRepository
 
 

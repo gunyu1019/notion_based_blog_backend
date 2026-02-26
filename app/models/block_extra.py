@@ -5,10 +5,10 @@ from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy.types import Text
 
-from app.models.database.base import Base
+from app.models.base import Base
 
 if TYPE_CHECKING:
-    from app.models.database.block import Block
+    from app.models.block import Block
 
 
 class BlockExtra(Base):

@@ -2,7 +2,7 @@ import asyncio
 
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncConnection, AsyncEngine
 
-from app.models.database import Block, BlockExtra, Page, RichText
+from app.models import Block, BlockExtra, Page, RichText
 
 
 async def main(engine: AsyncEngine):

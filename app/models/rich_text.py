@@ -5,10 +5,10 @@ from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import mapped_column, Mapped
 from sqlalchemy.types import Text
 
-from app.models.database.base import Base
+from app.models.base import Base
 
 if TYPE_CHECKING:
-    from app.models.notion.rich_text import RichText as NotionRichText
+    from app.models.notion import RichText as NotionRichText
 
 
 class RichText(Base):

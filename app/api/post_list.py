@@ -4,10 +4,10 @@ from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from app.core.config import get_config
-from app.models.notion.block import BLOCKS
-from app.models.response.post_item import PostItem
-from app.models.response.post_item_detail import PostItemDetail
-from app.modules.notion.client import NotionClient
+from app.services.notion.models import BLOCKS
+from app.schemas import PostItem
+from app.schemas import PostItemDetail
+from app.services.notion.client import NotionClient
 from app.repository.post_repository import PostRepository
 from app.utils.session_call import SessionCall
 

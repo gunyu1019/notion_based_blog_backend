@@ -5,8 +5,8 @@ from sqlalchemy import Text
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy.sql import func
 
-from app.models.database.base import Base
-from app.models.database.block import Block
+from app.models.base import Base
+from app.models.block import Block
 
 
 class Page(Base):

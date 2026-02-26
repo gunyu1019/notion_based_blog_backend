@@ -1,7 +1,7 @@
 import datetime
 from pydantic import BaseModel
 
-from app.models.notion.file import File
+from app.models.notion import File
 
 
 class Content(BaseModel):
