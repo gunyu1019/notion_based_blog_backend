@@ -2,11 +2,11 @@ import asyncio
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, AsyncEngine
 
-from core.config import get_config
-from services.notion.models import BLOCKS
-from services.notion.models import Database
-from services.notion.client import NotionClient
-from repository.post_repository import PostRepository
+from app.core.config import get_config
+from app.services.notion.models import BLOCKS
+from app.services.notion.models import Database
+from app.services.notion.client import NotionClient
+from app.repository.post_repository import PostRepository
 
 parser = get_config()
 

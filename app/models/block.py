@@ -4,16 +4,16 @@ from typing import TYPE_CHECKING, Any
 from sqlalchemy import String, ForeignKey, Integer
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
-from models.base import Base
-from models.block_extra import BlockExtra
-from models.rich_text import RichText
-from services.notion.models import BaseBlock
-from services.notion.models import File
-from services.notion.models.fileable import Fileable
+from .base import Base
+from .block_extra import BlockExtra
+from .rich_text import RichText
+from app.services.notion.models import BaseBlock
+from app.services.notion.models import File
+from app.services.notion.models.fileable import Fileable
 
 if TYPE_CHECKING:
-    from app.models.page import Page
-    from app.models.notion import BLOCKS, TableRow
+    from .page import Page
+    from app.services.notion.models import BLOCKS, TableRow
 
 
 class Block(Base):

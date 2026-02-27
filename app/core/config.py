@@ -1,7 +1,7 @@
 import os
 
 from configparser import ConfigParser
-from utils.directory import directory
+from app.utils.directory import directory
 
 
 def get_config(name: str = "config") -> ConfigParser:

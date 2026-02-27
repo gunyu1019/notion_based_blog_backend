@@ -1,6 +1,6 @@
 from pydantic import ConfigDict
 
-from services.notion.models import File
+from app.services.notion.models import File
 from .block import Block
 
 

@@ -1,6 +1,7 @@
 import importlib.util
 import logging
 import os
+import sys
 
 from enum import Enum
 from typing import Any, Callable
@@ -79,10 +80,11 @@ class ImportSupporter:
         try:
             spec.loader.exec_module(lib)  # type: ignore
         except Exception as error:
+            raise error
             error_log = self._get_error_log(error)
             self.logger.error(
                 self.logging_error(
-                    ImportSupportException.extension_not_found, name, error_log
+                    ImportSupportException.extension_failed, name, error_log
                 )
             )
             if self.is_debug:
@@ -110,7 +112,7 @@ class ImportSupporter:
     ):
         packages = [
             package + "." + file[:-3]
-            for file in os.listdir(os.path.join(directory, package))
+            for file in os.listdir(str(os.path.join(directory, package)))
             if file.endswith(".py")
         ]
         responses = []

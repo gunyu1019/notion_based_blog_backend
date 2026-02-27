@@ -4,9 +4,9 @@ import uuid
 from pydantic import BaseModel, Field
 
 from .category import Category
-from app.models.notion import Database
-from app.models.notion import DateProperty, MultiSelectProperty
-from app.models.notion import File
+from app.services.notion.models import Database
+from app.services.notion.models import DateProperty, MultiSelectProperty
+from app.services.notion.models import File
 
 
 class PostItem(BaseModel):

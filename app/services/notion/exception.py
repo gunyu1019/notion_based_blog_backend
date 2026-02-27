@@ -1,4 +1,4 @@
-from services.notion.models import error
+from .models import error
 
 
 class BadRequest(error.NotionException, Exception):

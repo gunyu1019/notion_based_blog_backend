@@ -7,10 +7,10 @@ from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import mapped_column, Mapped
 from sqlalchemy.types import Text
 
-from models.base import Base
+from .base import Base
 
 if TYPE_CHECKING:
-    from models.notion import RichText as NotionRichText
+    from app.services.notion.models import RichText as NotionRichText
 
 
 class RichText(Base):
@@ -35,7 +35,7 @@ class RichText(Base):
     parent_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("block.id", ondelete="CASCADE", onupdate="CASCADE"))
 
     @classmethod
-    def from_rich_text(cls, rich_text: "NotionRichText", index: int = -1, _id: uuid.UUID = None, _type: str = None):
+    def from_rich_text(cls, rich_text: NotionRichText, index: int = -1, _id: uuid.UUID = None, _type: str = None):
         annotated = rich_text.annotations
         return cls(
             id=_id or uuid.uuid4(),

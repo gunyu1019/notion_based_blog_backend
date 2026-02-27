@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 import uuid
 
 from pydantic import BaseModel, Field, ConfigDict, PrivateAttr
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
-from models.rich_text import RichText
+
+if TYPE_CHECKING:
+    from app.models.rich_text import RichText
 
 
 class Block(BaseModel):
@@ -11,7 +15,7 @@ class Block(BaseModel):
     type: str
 
     has_children: bool = Field(default=False)
-    children: list["Block"] = Field(default_factory=list)
+    children: list[Block] = Field(default_factory=list)
 
     text: list[RichText] = Field(default_factory=list)
     captions: list[RichText] = Field(default_factory=list)
