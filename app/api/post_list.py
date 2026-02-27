@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from app.core.config import get_config
 from app.services.notion.models import BLOCKS
+from app.schemas.blocks import Block, BLOCK_RES_SPEC_WITHOUT_RELOAD
 from app.schemas import PostItem
 from app.schemas import PostItemDetail
 from app.services.notion.client import NotionClient
@@ -27,7 +28,7 @@ async def list_of_posts(
         private_access: bool = False,
         session: PostRepository = Depends(database.call),
         client_session: NotionClient = Depends(client.call)
-):
+) -> list[PostItem]:
     pages = await client_session.query_database(database_id=database_id)
     post_items = [
         PostItem.from_notion(x)
@@ -46,7 +47,7 @@ async def post_info(
         post_id: uuid.UUID,
         session: PostRepository = Depends(database.call),
         client_session: NotionClient = Depends(client.call)
-):
+) -> PostItemDetail:
     page_from_notion = [
         x for x in await client_session.query_database(database_id=database_id)
         if x.id == post_id

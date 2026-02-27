@@ -24,7 +24,7 @@ client = SessionCall(
 async def content(
         item_id: uuid.UUID,
         client_session: NotionClient = Depends(client.call)
-):
+) -> list[Content]:
     try:
         content_block = await client_session.retrieve_block(
             block_id=item_id,
