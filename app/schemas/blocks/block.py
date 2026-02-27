@@ -4,10 +4,7 @@ import uuid
 
 from pydantic import BaseModel, Field, ConfigDict, PrivateAttr
 from typing import Any, TYPE_CHECKING
-
-
-if TYPE_CHECKING:
-    from app.models.rich_text import RichText
+from ..rich_text import RichText
 
 
 class Block(BaseModel):
