@@ -33,13 +33,13 @@ class Block(Base):
         ForeignKey("block.id", ondelete="CASCADE", onupdate="CASCADE"), nullable=True
     )
     # block_parent: Mapped["Block"] = relationship(back_populates="children")
-    block_parent: Mapped["Block"] = relationship(
+    block_parent: Mapped[Block] = relationship(
         "Block",
         remote_side=[id],
         cascade="all"
         # backref=backref("children", uselist=True, lazy="selectin"),
     )
-    page_parent: Mapped["Page"] = relationship(back_populates="blocks", cascade="all")
+    page_parent: Mapped[Page] = relationship(back_populates="blocks", cascade="all")
 
     # Children
     has_children: Mapped[bool] = mapped_column(default=False)
@@ -86,7 +86,7 @@ class Block(Base):
         return len(await self.awaitable_attrs.extra) > 0
 
     @classmethod
-    def from_block(cls, block: "BLOCKS", index: int = -1):
+    def from_block(cls, block: BLOCKS, index: int = -1):
         text = [
             RichText.from_rich_text(
                 x,
@@ -169,8 +169,8 @@ class Block(Base):
 
     @classmethod
     def from_notion_table_column(
-        cls, original_block: "TableRow", index: int
-    ) -> "BLOCKS":
+        cls, original_block: TableRow, index: int
+    ) -> BLOCKS:
         new_uuid = uuid.uuid5(original_block.id, f"table-cell-{index}")
 
         text = [
