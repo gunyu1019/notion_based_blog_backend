@@ -9,9 +9,9 @@ from ..rich_text import RichText
 
 
 if TYPE_CHECKING:
-    from . import BLOCKS_RES as AnyBlock
+    from . import BLOCKS_RES
 else:
-    AnyBlock = ForwardRef('AnyBlock')
+    BLOCKS_RES = ForwardRef('BLOCKS_RES')
 
 
 class Block(BaseModel):
@@ -19,7 +19,7 @@ class Block(BaseModel):
     type: str
 
     has_children: bool = Field(default=False)
-    children: list[AnyBlock] = Field(default_factory=list)
+    children: list[BLOCKS_RES] = Field(default_factory=list)
 
     text: list[RichText] = Field(default_factory=list)
     captions: list[RichText] = Field(default_factory=list)
