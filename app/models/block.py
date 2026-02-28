@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 import uuid
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from sqlalchemy import String, ForeignKey, Integer
 from sqlalchemy.orm import mapped_column, Mapped, relationship
@@ -13,6 +15,7 @@ from app.services.notion.models.fileable import Fileable
 
 if TYPE_CHECKING:
     from .page import Page
+    from typing import Any
     from app.services.notion.models import BLOCKS, TableRow
 
 
@@ -188,7 +191,7 @@ class Block(Base):
     @property
     def extra_dict(self) -> dict[str, Any]:
         return {
-            x.name: self._extra_tp(x.type)(x.value)
+            x.name: self._extra_tp(x.type, x.value)
             for x in self.extra
         }
 
@@ -199,13 +202,14 @@ class Block(Base):
         return super().__contains__(item) or item in [p.name for p in self.extra]
 
     @staticmethod
-    def _extra_tp(type_name: str) -> type:
+    def _extra_tp(type_name: str, type_value: Any) -> Any:
         match type_name:
             case "str":
-                return str
+                return str(type_value)
             case "int":
-                return int
+                return int(type_value)
             case "bool":
-                return bool
+                return bool(type_value)
             case "float":
-                return float
+                return float(type_value)
+        return type_value
