@@ -81,14 +81,14 @@ async def post_info(
 
     post_item.description = page_from_database.short_description
     for _block in page_from_database.blocks:
-
         for T in BLOCK_RES_SPEC_WITHOUT_RELOAD.__args__:
-            if _block.type in T.Metadata.available_type:
+            if _block.type in T.model_fields["type"].annotation.__args__:
                 _model = T.model_validate(_block)
                 break
         else:
             _model = Block.model_validate(_block)
-        _model.set_extra_data(_block.extra_dict)
+        # _model = TypeAdapter(BLOCKS_RES).validate_python(_block)
+        # _model.set_extra_data(_block.extra_dict)
         post_item.content.append(_model)
 
     return post_item

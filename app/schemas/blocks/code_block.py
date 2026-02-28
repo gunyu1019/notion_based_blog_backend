@@ -1,15 +1,15 @@
 from pydantic import ConfigDict, computed_field
+from typing import Literal
 
 from .block import Block
 
 
 class CodeBlock(Block):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
 
-    class Metadata:
-        available_type = ["code"]
+    type: Literal["code"]
 
     @computed_field
     @property
     def language(self) -> str:
-        return self._extra_dict["language"]
+        return self.extra_dict["language"]
