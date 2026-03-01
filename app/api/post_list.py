@@ -1,5 +1,6 @@
 import uuid
 
+from typing import Optional
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import async_sessionmaker
 
@@ -45,6 +46,7 @@ async def list_of_posts(
 @router.get("/post")
 async def post_info(
         post_id: uuid.UUID,
+        force_fetch: Optional[bool] = False,
         session: PostRepository = Depends(database.call),
         client_session: NotionClient = Depends(client.call)
 ) -> PostItemDetail:
@@ -71,7 +73,10 @@ async def post_info(
         is_new_entry = True
 
     # Equal last edited time (notion == database).
-    if post_item.last_edited_time.replace(tzinfo=None) != page_from_database.last_update_time and not is_new_entry:
+    if (
+            post_item.last_edited_time.replace(tzinfo=None) != page_from_database.last_update_time and not is_new_entry
+            or force_fetch
+    ):
         page: list[BLOCKS] = await client_session.retrieve_block_children(
             block_id=post_id,
             detail=True
